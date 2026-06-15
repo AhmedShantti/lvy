@@ -2,16 +2,19 @@ import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import { useAuth } from "@/store/auth";
 import {
   LayoutDashboard, ShoppingBag, Package, Users, Star, Tag, Layers, LogOut,
-  FileText, Sliders,
+  FileText, Sliders, FolderTree, UserCog, Truck,
 } from "lucide-react";
 
 import AdminOverview from "./admin/Overview";
 import AdminOrders from "./admin/Orders";
 import AdminProducts from "./admin/Products";
+import AdminCollections from "./admin/Collections";
 import AdminCustomers from "./admin/Customers";
+import AdminUsers from "./admin/Users";
 import AdminReviews from "./admin/Reviews";
 import AdminCategories from "./admin/Categories";
 import AdminCoupons from "./admin/Coupons";
+import AdminShippingZones from "./admin/ShippingZones";
 import AdminContent from "./admin/Content";
 import AdminSettings from "./admin/Settings";
 
@@ -19,10 +22,13 @@ const NAV = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/products", label: "Products", icon: Package },
-  { to: "/admin/customers", label: "Customers", icon: Users },
-  { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/categories", label: "Categories", icon: Layers },
+  { to: "/admin/collections", label: "Collections", icon: FolderTree },
+  { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/users", label: "Users", icon: UserCog },
+  { to: "/admin/reviews", label: "Reviews", icon: Star },
   { to: "/admin/coupons", label: "Coupons", icon: Tag },
+  { to: "/admin/shipping-zones", label: "Shipping Zones", icon: Truck },
   { to: "/admin/content", label: "Content", icon: FileText },
   { to: "/admin/settings", label: "Settings", icon: Sliders },
 ];
@@ -85,10 +91,13 @@ export default function Admin() {
           <Route index element={<AdminOverview />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="products" element={<AdminProducts />} />
-          <Route path="customers" element={<AdminCustomers />} />
-          <Route path="reviews" element={<AdminReviews />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="collections" element={<AdminCollections />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="reviews" element={<AdminReviews />} />
           <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="shipping-zones" element={<AdminShippingZones />} />
           <Route path="content" element={<AdminContent />} />
           <Route path="settings" element={<AdminSettings />} />
         </Routes>

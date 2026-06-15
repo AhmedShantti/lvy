@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, Edit2, Trash2, Image as ImageIcon, X, GripVertical } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast, errMessage } from "@/store/toast";
 import { Page, Card, LoadingRow, EmptyState, Modal, fmtMoney } from "./_shared";
 import MediaPicker from "@/components/admin/MediaPicker";
 
@@ -56,19 +57,39 @@ export default function AdminProducts() {
       compareAt: editing.compareAt ? Number(editing.compareAt) : undefined,
       stock: Number(editing.stock),
     };
-    if (editing.id) {
-      await api.put(`/admin/products/${editing.id}`, payload);
-    } else {
-      await api.post("/admin/products", payload);
+    try {
+      if (editing.id) {
+        await api.put(`/admin/products/${editing.id}`, payload);
+        toast.success("Product updated");
+      } else {
+        await api.post("/admin/products", payload);
+        toast.success("Product created");
+      }
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      setEditing(null);
+    } catch (e) {
+      toast.error(errMessage(e));
     }
-    qc.invalidateQueries({ queryKey: ["admin-products"] });
-    setEditing(null);
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this product? This cannot be undone.")) return;
-    await api.delete(`/admin/products/${id}`);
-    qc.invalidateQueries({ queryKey: ["admin-products"] });
+    try {
+      await api.delete(`/admin/products/${id}`);
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+      toast.success("Product deleted");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
+  };
+
+  const toggleFlag = async (id: string, flag: "featured" | "new") => {
+    try {
+      await api.patch(`/admin/products/${id}/${flag}`);
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   return (
@@ -128,8 +149,24 @@ export default function AdminProducts() {
                   </td>
                   <td className="p-4">
                     <div className="flex gap-1 flex-wrap">
-                      {p.featured && <span className="text-[9px] uppercase tracking-wider bg-charcoal text-cream px-2 py-0.5">Featured</span>}
-                      {p.isNew && <span className="text-[9px] uppercase tracking-wider bg-terracotta text-cream px-2 py-0.5">New</span>}
+                      <button
+                        onClick={() => toggleFlag(p.id, "featured")}
+                        title="Toggle featured"
+                        className={`text-[9px] uppercase tracking-wider px-2 py-0.5 transition ${
+                          p.featured ? "bg-charcoal text-cream" : "border border-charcoal/20 text-muted hover:border-charcoal"
+                        }`}
+                      >
+                        Featured
+                      </button>
+                      <button
+                        onClick={() => toggleFlag(p.id, "new")}
+                        title="Toggle new"
+                        className={`text-[9px] uppercase tracking-wider px-2 py-0.5 transition ${
+                          p.isNew ? "bg-terracotta text-cream" : "border border-charcoal/20 text-muted hover:border-charcoal"
+                        }`}
+                      >
+                        New
+                      </button>
                     </div>
                   </td>
                   <td className="p-4 text-right">
@@ -315,16 +352,26 @@ function VariantsDrawer({ productId, productName, onClose }: {
       price: Number(draft.price),
       stock: Number(draft.stock ?? 0),
     };
-    if (draft.id) await api.put(`/admin/variants/${draft.id}`, payload);
-    else await api.post("/admin/variants", payload);
-    qc.invalidateQueries({ queryKey: ["admin-variants", productId] });
-    setDraft(null);
+    try {
+      if (draft.id) await api.put(`/admin/variants/${draft.id}`, payload);
+      else await api.post("/admin/variants", payload);
+      qc.invalidateQueries({ queryKey: ["admin-variants", productId] });
+      setDraft(null);
+      toast.success("Variant saved");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this variant?")) return;
-    await api.delete(`/admin/variants/${id}`);
-    qc.invalidateQueries({ queryKey: ["admin-variants", productId] });
+    try {
+      await api.delete(`/admin/variants/${id}`);
+      qc.invalidateQueries({ queryKey: ["admin-variants", productId] });
+      toast.success("Variant deleted");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   const items = data?.items ?? [];

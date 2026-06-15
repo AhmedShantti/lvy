@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Star, Check, Trash2, CheckSquare, Square } from "lucide-react";
+import { Star, Check, Trash2, CheckSquare, Square, EyeOff } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast, errMessage } from "@/store/toast";
 import { Page, Card, LoadingRow, EmptyState, fmtDate } from "./_shared";
 
 const TABS = [
@@ -20,21 +21,46 @@ export default function AdminReviews() {
   });
 
   const approve = async (id: string) => {
-    await api.patch(`/admin/reviews/${id}/approve`);
-    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    try {
+      await api.patch(`/admin/reviews/${id}/approve`);
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      toast.success("Review approved");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
+  };
+
+  const reject = async (id: string) => {
+    try {
+      await api.patch(`/admin/reviews/${id}/reject`);
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      toast.success("Review unpublished");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this review?")) return;
-    await api.delete(`/admin/reviews/${id}`);
-    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+    try {
+      await api.delete(`/admin/reviews/${id}`);
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      toast.success("Review deleted");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   const bulkApprove = async () => {
     if (selected.length === 0) return;
-    await api.post("/admin/reviews/bulk-approve", { ids: selected });
-    qc.invalidateQueries({ queryKey: ["admin-reviews"] });
-    setSelected([]);
+    try {
+      await api.post("/admin/reviews/bulk-approve", { ids: selected });
+      qc.invalidateQueries({ queryKey: ["admin-reviews"] });
+      setSelected([]);
+      toast.success(`Approved ${selected.length} review${selected.length === 1 ? "" : "s"}`);
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   const toggleSelect = (id: string) =>
@@ -115,12 +141,19 @@ export default function AdminReviews() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      {!r.approved && (
+                      {!r.approved ? (
                         <button
                           onClick={() => approve(r.id)}
                           className="px-3 py-1.5 bg-emerald-700 text-cream text-xs uppercase tracking-wider hover:bg-emerald-800 flex items-center gap-1.5"
                         >
                           <Check size={12} /> Approve
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => reject(r.id)}
+                          className="px-3 py-1.5 border border-charcoal/20 text-xs uppercase tracking-wider hover:bg-charcoal hover:text-cream flex items-center gap-1.5"
+                        >
+                          <EyeOff size={12} /> Unpublish
                         </button>
                       )}
                       <button

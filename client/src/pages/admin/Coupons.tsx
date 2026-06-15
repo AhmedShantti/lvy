@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast, errMessage } from "@/store/toast";
 import { Page, Card, LoadingRow, EmptyState, Modal, fmtDate } from "./_shared";
 
 interface CouponForm {
@@ -33,19 +34,39 @@ export default function AdminCoupons() {
       minTotal: editing.minTotal ? Number(editing.minTotal) : undefined,
       expiresAt: editing.expiresAt ? new Date(editing.expiresAt).toISOString() : undefined,
     };
-    if (editing.id) {
-      await api.put(`/admin/coupons/${editing.id}`, payload);
-    } else {
-      await api.post("/admin/coupons", payload);
+    try {
+      if (editing.id) {
+        await api.put(`/admin/coupons/${editing.id}`, payload);
+        toast.success("Coupon updated");
+      } else {
+        await api.post("/admin/coupons", payload);
+        toast.success("Coupon created");
+      }
+      qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+      setEditing(null);
+    } catch (e) {
+      toast.error(errMessage(e));
     }
-    qc.invalidateQueries({ queryKey: ["admin-coupons"] });
-    setEditing(null);
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this coupon?")) return;
-    await api.delete(`/admin/coupons/${id}`);
-    qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+    try {
+      await api.delete(`/admin/coupons/${id}`);
+      qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+      toast.success("Coupon deleted");
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
+  };
+
+  const toggleActive = async (id: string) => {
+    try {
+      await api.patch(`/admin/coupons/${id}/toggle`);
+      qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   const items = coupons.data?.items ?? [];
@@ -84,11 +105,15 @@ export default function AdminCoupons() {
                   <td className="p-4 text-muted">{c.minTotal ? `$${c.minTotal}` : "—"}</td>
                   <td className="p-4 text-muted">{c.expiresAt ? fmtDate(c.expiresAt) : "Never"}</td>
                   <td className="p-4">
-                    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 ${
-                      c.active ? "bg-emerald-700 text-cream" : "bg-charcoal/10 text-muted"
-                    }`}>
+                    <button
+                      onClick={() => toggleActive(c.id)}
+                      title="Toggle active"
+                      className={`text-[10px] uppercase tracking-wider px-2 py-0.5 transition ${
+                        c.active ? "bg-emerald-700 text-cream hover:bg-emerald-800" : "bg-charcoal/10 text-muted hover:bg-charcoal/20"
+                      }`}
+                    >
                       {c.active ? "Active" : "Inactive"}
-                    </span>
+                    </button>
                   </td>
                   <td className="p-4 text-right">
                     <div className="inline-flex gap-2">

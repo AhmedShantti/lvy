@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, X, RefreshCcw, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast, errMessage } from "@/store/toast";
 import { Page, Card, LoadingRow, EmptyState, fmtDate, fmtMoney } from "./_shared";
 
 const STATUSES = ["PENDING","CONFIRMED","PACKED","SHIPPED","OUT_FOR_DELIVERY","DELIVERED","CANCELLED","REFUNDED"];
+const PAYMENT_STATUSES = ["PENDING","PAID","FAILED","REFUNDED"];
 
 export default function AdminOrders() {
   const qc = useQueryClient();
@@ -40,9 +42,25 @@ export default function AdminOrders() {
   };
 
   const updateStatus = async (id: string, status: string) => {
-    await api.patch(`/admin/orders/${id}/status`, { status });
-    qc.invalidateQueries({ queryKey: ["admin-orders"] });
-    if (openId) qc.invalidateQueries({ queryKey: ["admin-order", openId] });
+    try {
+      await api.patch(`/admin/orders/${id}/status`, { status });
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      if (openId) qc.invalidateQueries({ queryKey: ["admin-order", openId] });
+      toast.success(`Status set to ${status.replace(/_/g, " ")}`);
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
+  };
+
+  const updatePayment = async (id: string, paymentStatus: string) => {
+    try {
+      await api.patch(`/admin/orders/${id}/payment`, { paymentStatus });
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      if (openId) qc.invalidateQueries({ queryKey: ["admin-order", openId] });
+      toast.success(`Payment set to ${paymentStatus}`);
+    } catch (e) {
+      toast.error(errMessage(e));
+    }
   };
 
   return (
@@ -150,13 +168,15 @@ export default function AdminOrders() {
         </div>
       )}
 
-      {openId && <OrderDrawer id={openId} onClose={() => setOpenId(null)} onStatusChange={updateStatus} />}
+      {openId && <OrderDrawer id={openId} onClose={() => setOpenId(null)} onStatusChange={updateStatus} onPaymentChange={updatePayment} />}
     </Page>
   );
 }
 
-function OrderDrawer({ id, onClose, onStatusChange }: {
-  id: string; onClose: () => void; onStatusChange: (id: string, status: string) => void;
+function OrderDrawer({ id, onClose, onStatusChange, onPaymentChange }: {
+  id: string; onClose: () => void;
+  onStatusChange: (id: string, status: string) => void;
+  onPaymentChange: (id: string, paymentStatus: string) => void;
 }) {
   const qc = useQueryClient();
   const [refunding, setRefunding] = useState(false);
@@ -180,6 +200,9 @@ function OrderDrawer({ id, onClose, onStatusChange }: {
       await api.patch(`/admin/orders/${id}/notes`, { notes });
       qc.invalidateQueries({ queryKey: ["admin-order", id] });
       setNotesDirty(false);
+      toast.success("Note saved");
+    } catch (e) {
+      toast.error(errMessage(e));
     } finally {
       setSavingNotes(false);
     }
@@ -192,6 +215,9 @@ function OrderDrawer({ id, onClose, onStatusChange }: {
       await api.post(`/admin/orders/${id}/refund`);
       qc.invalidateQueries({ queryKey: ["admin-order", id] });
       qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      toast.success("Order refunded");
+    } catch (e) {
+      toast.error(errMessage(e));
     } finally {
       setRefunding(false);
     }
@@ -240,6 +266,18 @@ function OrderDrawer({ id, onClose, onStatusChange }: {
                   {order.paymentStatus === "REFUNDED" ? "Refunded" : refunding ? "Processing…" : "Refund"}
                 </button>
               </div>
+            </div>
+
+            {/* Payment status */}
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-muted mb-2">Payment status</p>
+              <select
+                value={order.paymentStatus}
+                onChange={(e) => onPaymentChange(order.id, e.target.value)}
+                className="w-full px-3 py-2 border border-charcoal/20 bg-cream text-sm"
+              >
+                {PAYMENT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
 
             {/* Customer */}

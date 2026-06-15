@@ -572,3 +572,298 @@ adminRouter.get("/stats/timeseries", async (req, res, next) => {
     res.json({ series, topItems, byStatus, lowStock });
   } catch (e) { next(e); }
 });
+
+// ═════ Dashboard summary (cards + recent orders + low stock) ═════
+adminRouter.get("/dashboard", async (_req, res, next) => {
+  try {
+    const [totalOrders, totalUsers, totalProducts, revenue, recentOrders, lowStockProducts] = await Promise.all([
+      prisma.order.count(),
+      prisma.user.count(),
+      prisma.product.count(),
+      prisma.order.aggregate({ _sum: { total: true }, where: { paymentStatus: "PAID" } }),
+      prisma.order.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        select: {
+          id: true, number: true, email: true, total: true,
+          status: true, paymentStatus: true, createdAt: true,
+        },
+      }),
+      prisma.product.findMany({
+        where: { stock: { lte: 5 } },
+        select: { id: true, name: true, slug: true, stock: true, images: true },
+        orderBy: { stock: "asc" },
+        take: 10,
+      }),
+    ]);
+    res.json({
+      totalOrders,
+      totalRevenue: revenue._sum.total ?? 0,
+      totalUsers,
+      totalProducts,
+      recentOrders,
+      lowStockProducts,
+    });
+  } catch (e) { next(e); }
+});
+
+// ═════ Products list + flag toggles ═════
+adminRouter.get("/products", async (req, res, next) => {
+  try {
+    const { q, page, limit } = z.object({
+      q: z.string().optional(),
+      page: z.coerce.number().min(1).default(1),
+      limit: z.coerce.number().min(1).max(100).default(50),
+    }).parse(req.query);
+    const where: any = {};
+    if (q) where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { slug: { contains: q, mode: "insensitive" } },
+    ];
+    const [items, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: { category: true, _count: { select: { variants: true } } },
+      }),
+      prisma.product.count({ where }),
+    ]);
+    res.json({ items, total, page, pages: Math.ceil(total / limit) });
+  } catch (e) { next(e); }
+});
+
+adminRouter.patch("/products/:id/featured", async (req, res, next) => {
+  try {
+    const current = await prisma.product.findUnique({ where: { id: req.params.id }, select: { featured: true } });
+    if (!current) throw new HttpError(404, "Product not found");
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { featured: !current.featured },
+    });
+    res.json({ product });
+  } catch (e) { next(e); }
+});
+
+adminRouter.patch("/products/:id/new", async (req, res, next) => {
+  try {
+    const current = await prisma.product.findUnique({ where: { id: req.params.id }, select: { isNew: true } });
+    if (!current) throw new HttpError(404, "Product not found");
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { isNew: !current.isNew },
+    });
+    res.json({ product });
+  } catch (e) { next(e); }
+});
+
+// ═════ Categories list ═════
+adminRouter.get("/categories", async (_req, res, next) => {
+  try {
+    const items = await prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { products: true } } },
+    });
+    res.json({ items });
+  } catch (e) { next(e); }
+});
+
+// ═════ Collections CRUD ═════
+const collectionSchema = z.object({
+  name: z.string().min(1),
+  slug: z.string().min(1),
+  description: z.string().optional(),
+  cover: z.string().optional(),
+});
+
+adminRouter.get("/collections", async (_req, res, next) => {
+  try {
+    const items = await prisma.collection.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { products: true } } },
+    });
+    res.json({ items });
+  } catch (e) { next(e); }
+});
+
+adminRouter.post("/collections", async (req, res, next) => {
+  try {
+    const data = collectionSchema.parse(req.body);
+    const collection = await prisma.collection.create({ data });
+    res.status(201).json({ collection });
+  } catch (e) { next(e); }
+});
+
+adminRouter.put("/collections/:id", async (req, res, next) => {
+  try {
+    const data = collectionSchema.partial().parse(req.body);
+    const collection = await prisma.collection.update({ where: { id: req.params.id }, data });
+    res.json({ collection });
+  } catch (e) { next(e); }
+});
+
+adminRouter.delete("/collections/:id", async (req, res, next) => {
+  try {
+    await prisma.collection.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ═════ Order payment status ═════
+adminRouter.patch("/orders/:id/payment", async (req, res, next) => {
+  try {
+    const { paymentStatus } = z.object({
+      paymentStatus: z.enum(["PENDING", "PAID", "FAILED", "REFUNDED"]),
+    }).parse(req.body);
+    const order = await prisma.order.update({
+      where: { id: req.params.id },
+      data: { paymentStatus },
+    });
+    res.json({ order });
+  } catch (e) { next(e); }
+});
+
+// ═════ Users (all roles) ═════
+adminRouter.get("/users", async (req, res, next) => {
+  try {
+    const { q, role, page, limit } = z.object({
+      q: z.string().optional(),
+      role: z.enum(["CUSTOMER", "ADMIN"]).optional(),
+      page: z.coerce.number().min(1).default(1),
+      limit: z.coerce.number().min(1).max(100).default(25),
+    }).parse(req.query);
+    const where: any = {};
+    if (role) where.role = role;
+    if (q) where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { email: { contains: q, mode: "insensitive" } },
+    ];
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true, name: true, email: true, role: true, phone: true, createdAt: true,
+          _count: { select: { orders: true, reviews: true } },
+        },
+      }),
+      prisma.user.count({ where }),
+    ]);
+    res.json({ items: users, total, page, pages: Math.ceil(total / limit) });
+  } catch (e) { next(e); }
+});
+
+adminRouter.get("/users/:id", async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true, name: true, email: true, role: true, phone: true, createdAt: true,
+        addresses: true,
+        orders: { orderBy: { createdAt: "desc" }, include: { items: true } },
+      },
+    });
+    if (!user) throw new HttpError(404, "User not found");
+    res.json({ user });
+  } catch (e) { next(e); }
+});
+
+adminRouter.patch("/users/:id/role", async (req, res, next) => {
+  try {
+    const { role } = z.object({ role: z.enum(["CUSTOMER", "ADMIN"]) }).parse(req.body);
+    // Guard: never demote the last remaining admin
+    if (role === "CUSTOMER") {
+      const target = await prisma.user.findUnique({ where: { id: req.params.id }, select: { role: true } });
+      if (target?.role === "ADMIN") {
+        const admins = await prisma.user.count({ where: { role: "ADMIN" } });
+        if (admins <= 1) throw new HttpError(400, "Cannot demote the last admin");
+      }
+    }
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { role },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    res.json({ user });
+  } catch (e) { next(e); }
+});
+
+// ═════ Coupon active toggle ═════
+adminRouter.patch("/coupons/:id/toggle", async (req, res, next) => {
+  try {
+    const current = await prisma.coupon.findUnique({ where: { id: req.params.id }, select: { active: true } });
+    if (!current) throw new HttpError(404, "Coupon not found");
+    const coupon = await prisma.coupon.update({
+      where: { id: req.params.id },
+      data: { active: !current.active },
+    });
+    res.json({ coupon });
+  } catch (e) { next(e); }
+});
+
+// ═════ Review reject (unpublish) ═════
+adminRouter.patch("/reviews/:id/reject", async (req, res, next) => {
+  try {
+    const review = await prisma.review.update({
+      where: { id: req.params.id },
+      data: { approved: false },
+    });
+    await recomputeProductRating(review.productId);
+    res.json({ review });
+  } catch (e) { next(e); }
+});
+
+// ═════ Shipping zones CRUD ═════
+const shippingZoneSchema = z.object({
+  name: z.string().min(1),
+  postalPrefix: z.string().min(1),
+  standard: z.number().nonnegative(),
+  express: z.number().nonnegative(),
+  whiteGlove: z.number().nonnegative(),
+});
+
+adminRouter.get("/shipping-zones", async (_req, res, next) => {
+  try {
+    const items = await prisma.shippingZone.findMany({ orderBy: { name: "asc" } });
+    res.json({ items });
+  } catch (e) { next(e); }
+});
+
+adminRouter.post("/shipping-zones", async (req, res, next) => {
+  try {
+    const data = shippingZoneSchema.parse(req.body);
+    const zone = await prisma.shippingZone.create({ data });
+    res.status(201).json({ zone });
+  } catch (e) { next(e); }
+});
+
+adminRouter.put("/shipping-zones/:id", async (req, res, next) => {
+  try {
+    const data = shippingZoneSchema.partial().parse(req.body);
+    const zone = await prisma.shippingZone.update({ where: { id: req.params.id }, data });
+    res.json({ zone });
+  } catch (e) { next(e); }
+});
+
+adminRouter.delete("/shipping-zones/:id", async (req, res, next) => {
+  try {
+    await prisma.shippingZone.delete({ where: { id: req.params.id } });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ═════ Single-setting upsert ═════
+adminRouter.put("/settings/:key", async (req, res, next) => {
+  try {
+    const { value } = z.object({ value: z.any() }).parse(req.body);
+    const setting = await prisma.setting.upsert({
+      where: { key: req.params.key },
+      update: { value },
+      create: { key: req.params.key, value },
+    });
+    res.json({ setting });
+  } catch (e) { next(e); }
+});

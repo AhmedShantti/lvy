@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Save, Check } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast, errMessage } from "@/store/toast";
 import { Page, Card, LoadingRow } from "./_shared";
 
 const GROUPS = [
@@ -69,6 +70,9 @@ export default function AdminSettings() {
       await api.put("/admin/settings", form);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      toast.success("Settings saved");
+    } catch (e) {
+      toast.error(errMessage(e));
     } finally {
       setSaving(false);
     }
