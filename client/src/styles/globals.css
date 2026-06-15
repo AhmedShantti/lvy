@@ -66,7 +66,22 @@
            font-medium transition-all duration-300 ease-soft;
   }
   .btn-primary { @apply bg-charcoal text-cream hover:bg-walnut; }
+  .btn-terracotta { @apply bg-terracotta text-cream hover:bg-terracotta/90; }
+  .btn-secondary { @apply bg-sand text-charcoal hover:bg-sand/70; }
   .btn-outline { @apply border border-charcoal/20 hover:border-charcoal hover:bg-charcoal hover:text-cream; }
+
+  /* Form primitives — shared input styling for consistent boutique forms */
+  .field-label { @apply mb-2 block text-[11px] uppercase tracking-[0.25em] text-stone; }
+  .input {
+    @apply w-full rounded-md border border-charcoal/15 bg-paper px-4 py-3 text-charcoal
+           placeholder:text-stone/60 outline-none transition
+           focus:border-charcoal focus:ring-2 focus:ring-charcoal/10
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .input-underline {
+    @apply w-full border-0 border-b border-charcoal/25 bg-transparent px-0 py-2.5 text-charcoal
+           placeholder:text-stone/50 outline-none transition focus:border-charcoal;
+  }
   .link-underline {
     @apply relative after:absolute after:bottom-0 after:left-0 after:h-px
            after:w-full after:origin-right after:scale-x-0 after:bg-current

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { LvyLogo } from "@/components/brand/LvyLogo";
 
 function PriceTag({ price, compareAt }: { price: number; compareAt?: number | null }) {
   const onSale = compareAt && compareAt > price;
@@ -20,7 +21,7 @@ function FeaturedCard({ p, size = "md" }: { p: any; size?: "xl" | "md" | "sm" })
 
   return (
     <Link to={`/product/${p.slug}`} className="block group relative h-full">
-      <div className={`relative ${aspect} overflow-hidden bg-sand/40`}>
+      <div className={`relative ${aspect} overflow-hidden rounded-t-[2rem] border border-charcoal/10 bg-sand/40`}>
         <img
           src={p.images[0]}
           alt={p.name}
@@ -91,10 +92,11 @@ export default function FeaturedProducts({ data: content }: { data?: any }) {
         {/* Header */}
         <div className="flex items-end justify-between mb-14">
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-4 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" /> {eyebrow}
+            <p className="text-[11px] uppercase tracking-[0.3em] text-terracotta mb-4 flex items-center gap-3">
+              <LvyLogo decorative className="h-3 w-auto text-terracotta" />
+              <span aria-hidden className="w-8 h-px bg-terracotta/50" /> {eyebrow}
             </p>
-            <h2 className="font-display text-5xl lg:text-6xl leading-[0.95] tracking-tightest">
+            <h2 className="font-display text-[clamp(2.5rem,5vw,4.25rem)] leading-[0.95] tracking-tightest">
               {title}<br />
               <em className="italic font-light text-terracotta">{titleAccent}</em>
             </h2>

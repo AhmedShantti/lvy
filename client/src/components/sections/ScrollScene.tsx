@@ -7,33 +7,33 @@ const SLIDES = [
   {
     image: "/toa-heftiba-LE3UlRqIFR0-unsplash.jpg",
     eyebrow: "Material",
-    title: "Sheen wool,\nhand-tufted.",
-    body: "Each piece is upholstered in a tightly woven wool sheen — finished by hand and treated with a natural water repellent.",
+    title: "Natural cotton,\nhand-knotted.",
+    body: "Each piece is knotted by hand from soft, undyed cotton rope — chosen for its drape, its texture, and the way it softens the light in a room.",
   },
   {
     image: "/ceyda-ciftci-JO5Y80Fajjo-unsplash.jpg",
     eyebrow: "Craft",
-    title: "Joinery you\ncan feel.",
-    body: "Solid oak frame, mortise-and-tenon joints, and a webbed suspension that lasts two decades — not two seasons.",
+    title: "Knots tied\nwith intention.",
+    body: "Time-honoured macramé techniques, passed down through generations — every loop tied slowly and deliberately, to last for years, not seasons.",
   },
   {
     image: "/toa-heftiba-GyG8thVBInw-unsplash.jpg",
     eyebrow: "Detail",
-    title: "Every edge,\nconsidered.",
-    body: "From hand-sanded surfaces to turned brass hardware — no shortcuts, no filler, nothing that wouldn't make the cut in our studio.",
+    title: "Every fibre,\nconsidered.",
+    body: "From the weight of the cord to the grain of the wooden dowel — honest materials, no shortcuts, nothing that wouldn't make the cut in our studio.",
   },
   {
     image: "/dmitry-mashkin-QAmRmIvSZZM-unsplash.jpg",
-    eyebrow: "Delivery",
-    title: "White glove,\nevery time.",
-    body: "We bring it inside, place it where you want, assemble it, and remove the packaging. Available in 30+ cities.",
+    eyebrow: "Made to belong",
+    title: "Softness that\nstays.",
+    body: "Crafted in small batches and packaged with care — ready to bring a quiet, lasting calm into the space you love most.",
   },
 ];
 
 export default function ScrollScene({ data: content }: { data?: any }) {
   const ref = useRef<HTMLDivElement>(null);
-  const eyebrow = content?.eyebrow ?? "Featured Piece";
-  const title = content?.title ?? "The Sheen Lounge";
+  const eyebrow = content?.eyebrow ?? "The Craft";
+  const title = content?.title ?? "Made by hand, felt by soul";
   const panels = content?.panels?.length ? content.panels : null;
 
   // Use CMS panels if available, merge with default images
@@ -81,7 +81,7 @@ export default function ScrollScene({ data: content }: { data?: any }) {
           <div className="container flex items-end justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-terracotta flex items-center gap-3">
-                <span className="w-8 h-px bg-terracotta" /> {eyebrow}
+                <span aria-hidden className="w-8 h-px bg-terracotta" /> {eyebrow}
               </p>
               <h2 className="font-display text-4xl lg:text-5xl text-cream mt-3 tracking-tightest">{title}</h2>
             </div>
@@ -173,7 +173,7 @@ function Slide({
         <div className="container">
           <div className="max-w-xl">
             <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-5 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" />
+              <span aria-hidden className="w-8 h-px bg-terracotta" />
               {slide.eyebrow}
             </p>
             <h3 className="font-display text-5xl lg:text-7xl text-cream leading-[0.95] tracking-tightest whitespace-pre-line">
@@ -187,7 +187,7 @@ function Slide({
       </motion.div>
 
       {/* Slide number — right side, vertically centered */}
-      <div className="absolute right-8 lg:right-16 top-1/2 -translate-y-1/2 z-20 hidden md:block">
+      <div aria-hidden className="absolute right-8 lg:right-16 top-1/2 -translate-y-1/2 z-20 hidden md:block">
         <p className="font-display text-8xl lg:text-9xl text-cream/[0.06] leading-none tabular-nums">
           {String(index + 1).padStart(2, "0")}
         </p>

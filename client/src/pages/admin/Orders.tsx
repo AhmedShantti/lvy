@@ -134,7 +134,7 @@ export default function AdminOrders() {
                   </td>
                   <td className="p-4">
                     <span className={`text-[10px] uppercase tracking-wider ${
-                      o.paymentStatus === "PAID" ? "text-emerald-700" :
+                      o.paymentStatus === "PAID" ? "text-sage" :
                       o.paymentStatus === "REFUNDED" ? "text-terracotta" : "text-muted"
                     }`}>{o.paymentStatus}</span>
                   </td>

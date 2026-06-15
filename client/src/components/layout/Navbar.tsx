@@ -10,6 +10,7 @@ import { useWishlist } from "@/store/wishlist";
 import { useAuth } from "@/store/auth";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { LvyLogo } from "@/components/brand/LvyLogo";
 
 const LINKS = [
   { to: "/shop", label: "Shop", hasMegaMenu: true },
@@ -19,9 +20,9 @@ const LINKS = [
 ];
 
 const TICKER = [
-  { icon: Truck, text: "Complimentary white-glove delivery over $1,500" },
-  { icon: Leaf, text: "FSC-certified wood · Made by hand in small batches" },
-  { icon: Award, text: "5-year warranty on every piece we make" },
+  { icon: Award, text: "Hand-knotted in small batches · Made with care" },
+  { icon: Leaf, text: "Natural fibres · Cotton, jute & linen" },
+  { icon: Truck, text: "Made to order · Carbon-neutral shipping" },
 ];
 
 export default function Navbar() {
@@ -130,11 +131,12 @@ export default function Navbar() {
             {/* Logo */}
             <Link
               to="/"
-              className="font-display text-3xl tracking-tightest leading-none relative group"
+              aria-label="LVY — home"
+              className="relative leading-none group"
               onMouseEnter={() => setMegaOpen(false)}
             >
-              <span className="relative z-10">lvy</span>
-              <span className="absolute -top-1 -right-4 text-[8px] uppercase tracking-[0.3em] text-terracotta">®</span>
+              <LvyLogo title="LVY" className="h-6 w-auto text-charcoal transition-colors group-hover:text-terracotta lg:h-7" />
+              <span aria-hidden className="absolute -top-1 -right-3 text-[8px] uppercase tracking-[0.3em] text-terracotta">®</span>
             </Link>
 
             {/* Center links */}
@@ -142,7 +144,7 @@ export default function Navbar() {
               {LINKS.map((l) => (
                 <div
                   key={l.label}
-                  className="relative"
+                  className="group/link relative"
                   onMouseEnter={() => setMegaOpen(l.hasMegaMenu ? true : false)}
                 >
                   <NavLink
@@ -155,7 +157,7 @@ export default function Navbar() {
                     }
                   >
                     {l.label}
-                    <span className="absolute -bottom-0.5 left-0 right-0 h-px bg-charcoal scale-x-0 group-hover/link:scale-x-100 origin-right transition-transform duration-500" />
+                    <span aria-hidden className="absolute -bottom-0.5 left-0 right-0 h-px origin-right scale-x-0 bg-terracotta transition-transform duration-500 ease-soft group-hover/link:origin-left group-hover/link:scale-x-100" />
                   </NavLink>
                 </div>
               ))}
@@ -396,7 +398,7 @@ function SearchOverlay({ onClose, onPick }: { onClose: () => void; onPick: (slug
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search for sofas, chairs, lamps…"
+            placeholder="Search wall hangings, plant hangers…"
             className="flex-1 bg-transparent font-display text-4xl lg:text-5xl outline-none placeholder:text-charcoal/20"
           />
           {q && (
@@ -411,7 +413,7 @@ function SearchOverlay({ onClose, onPick }: { onClose: () => void; onPick: (slug
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-muted mb-4">Popular searches</p>
               <div className="flex flex-wrap gap-2">
-                {["Linen Sofa", "Walnut Table", "Boucle Chair", "Oak Bookshelf", "Marble Coffee", "Wool Rug"].map((s) => (
+                {["Wall Hanging", "Plant Hanger", "Macramé Runner", "Woven Wall Art", "Fringe Cushion", "Macramé Rug"].map((s) => (
                   <button
                     key={s}
                     onClick={() => setQ(s)}
@@ -474,7 +476,7 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
         className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-cream flex flex-col overflow-y-auto"
       >
         <div className="flex items-center justify-between p-6 border-b border-charcoal/10">
-          <Link to="/" className="font-display text-2xl">lvy</Link>
+          <Link to="/" aria-label="LVY — home"><LvyLogo title="LVY" className="h-5 w-auto text-charcoal" /></Link>
           <button onClick={onClose}><X size={24} /></button>
         </div>
 

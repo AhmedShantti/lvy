@@ -4,11 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { LvyLogo } from "@/components/brand/LvyLogo";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function CategoryGrid({ data: content }: { data?: any }) {
-  const eyebrow = content?.eyebrow ?? "Curated spaces";
+  const eyebrow = content?.eyebrow ?? "Curated collections";
   const title = content?.title ?? "Shop";
-  const titleAccent = content?.titleAccent ?? "by room.";
+  const titleAccent = content?.titleAccent ?? "the collections.";
 
   const { data } = useQuery({
     queryKey: ["categories"],
@@ -41,33 +44,31 @@ export default function CategoryGrid({ data: content }: { data?: any }) {
   if (categories.length === 0) return null;
 
   return (
-    <section className="section bg-sand/40 relative overflow-hidden">
+    <section className="section relative overflow-hidden bg-cream">
       <div className="container">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-14">
+        <div className="mb-14 flex items-end justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-4 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" /> {eyebrow}
+            <p className="mb-5 flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-terracotta">
+              <LvyLogo decorative className="h-3 w-auto text-terracotta" />
+              <span aria-hidden className="h-px w-8 bg-terracotta/50" /> {eyebrow}
             </p>
-            <h2 className="font-display text-5xl lg:text-6xl leading-[0.95] tracking-tightest">
-              {title}<br />
-              <em className="italic font-light text-terracotta">{titleAccent}</em>
+            <h2 className="font-display text-[clamp(2.5rem,5vw,4.25rem)] leading-[0.95] tracking-tightest">
+              {title} <em className="font-light italic text-terracotta">{titleAccent}</em>
             </h2>
           </div>
 
-          {/* Nav arrows */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden items-center gap-3 md:flex">
             <button
               onClick={() => scrollBy(-1)}
-              className="w-12 h-12 rounded-full border border-charcoal/25 hover:bg-charcoal hover:text-cream hover:border-charcoal transition flex items-center justify-center"
-              aria-label="Previous"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-charcoal/20 transition hover:border-charcoal hover:bg-charcoal hover:text-cream"
+              aria-label="Previous collections"
             >
               <ArrowLeft size={16} />
             </button>
             <button
               onClick={() => scrollBy(1)}
-              className="w-12 h-12 rounded-full border border-charcoal/25 hover:bg-charcoal hover:text-cream hover:border-charcoal transition flex items-center justify-center"
-              aria-label="Next"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-charcoal/20 transition hover:border-charcoal hover:bg-charcoal hover:text-cream"
+              aria-label="Next collections"
             >
               <ArrowRight size={16} />
             </button>
@@ -75,53 +76,48 @@ export default function CategoryGrid({ data: content }: { data?: any }) {
         </div>
       </div>
 
-      {/* Horizontal lookbook — bleeds off the container edge */}
+      {/* Arch lookbook — bleeds off the container edge */}
       <div
         ref={scrollerRef}
-        className="flex gap-4 lg:gap-6 overflow-x-auto snap-x snap-mandatory pb-4 px-[max(1rem,calc((100vw-80rem)/2))] scrollbar-hide"
+        className="flex gap-6 overflow-x-auto px-[max(1.25rem,calc((100vw-80rem)/2))] pb-4 scrollbar-hide snap-x snap-mandatory lg:gap-8"
       >
         {categories.map((c, i) => {
           const count = c._count?.products ?? 0;
           return (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.8, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="flex-shrink-0 w-[78%] md:w-[44%] lg:w-[28%] snap-start"
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, delay: i * 0.08, ease: EASE }}
+              className="w-[74%] flex-shrink-0 snap-start md:w-[44%] lg:w-[27%]"
             >
-              <Link to={`/shop?category=${c.slug}`} className="block group relative">
-                {/* Number */}
-                <div className="flex items-center justify-between mb-4">
-                  <p className="font-display text-2xl tabular-nums text-charcoal/30">
-                    N°{String(i + 1).padStart(2, "0")}
-                  </p>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-muted">
-                    {count} {count === 1 ? "piece" : "pieces"}
-                  </p>
-                </div>
-
-                {/* Image card */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-charcoal/10">
+              <Link to={`/shop?category=${c.slug}`} className="group block">
+                {/* Arch image */}
+                <div className="relative aspect-[3/4] overflow-hidden rounded-t-full border border-charcoal/10 bg-sand/50">
                   <img
                     src={c.image}
                     alt={c.name}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-[900ms] ease-out"
+                    className="absolute inset-0 h-full w-full object-cover transition duration-[900ms] ease-soft group-hover:scale-[1.05]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent" />
+                  <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-charcoal/30 via-transparent to-transparent" />
+                  <span aria-hidden className="absolute left-1/2 top-6 -translate-x-1/2 font-display text-sm tabular-nums text-cream/80">
+                    N°{String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
 
-                  {/* Title block at bottom */}
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-cream">
-                    <h3 className="font-display text-3xl lg:text-4xl leading-tight">{c.name}</h3>
-                    <div className="mt-3 flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] opacity-90 group-hover:gap-3 transition-all">
-                      Explore <ArrowUpRight size={12} />
-                    </div>
+                {/* Plate */}
+                <div className="mt-5 flex items-end justify-between gap-3">
+                  <div>
+                    <h3 className="font-display text-2xl leading-tight lg:text-3xl">{c.name}</h3>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-stone">
+                      {count} {count === 1 ? "piece" : "pieces"}
+                    </p>
                   </div>
-
-                  {/* Hover accent border */}
-                  <div className="absolute inset-0 border-0 group-hover:border-[12px] border-cream/20 transition-all duration-500" />
+                  <span className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.3em] text-terracotta transition-all group-hover:gap-2.5">
+                    Explore <ArrowUpRight size={13} />
+                  </span>
                 </div>
               </Link>
             </motion.div>
@@ -129,17 +125,17 @@ export default function CategoryGrid({ data: content }: { data?: any }) {
         })}
       </div>
 
-      {/* Scroll progress bar */}
+      {/* Progress */}
       <div className="container mt-10">
         <div className="flex items-center gap-6">
-          <div className="flex-1 h-px bg-charcoal/15 relative overflow-hidden">
+          <div className="relative h-px flex-1 overflow-hidden bg-charcoal/15">
             <motion.div
-              className="absolute inset-y-0 left-0 bg-charcoal"
-              style={{ width: `${Math.max(20, progress * 100)}%` }}
+              className="absolute inset-y-0 left-0 bg-terracotta"
+              style={{ width: `${Math.max(18, progress * 100)}%` }}
               transition={{ type: "spring", stiffness: 180, damping: 30 }}
             />
           </div>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-muted tabular-nums">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-stone tabular-nums">
             {String(Math.round(progress * (categories.length - 1)) + 1).padStart(2, "0")} / {String(categories.length).padStart(2, "0")}
           </p>
         </div>

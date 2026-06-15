@@ -28,7 +28,7 @@ const STATUS_COLOR: Record<string, string> = {
   PACKED: "text-charcoal",
   SHIPPED: "text-terracotta",
   OUT_FOR_DELIVERY: "text-terracotta",
-  DELIVERED: "text-emerald-700",
+  DELIVERED: "text-sage",
   CANCELLED: "text-muted",
   REFUNDED: "text-terracotta",
 };
