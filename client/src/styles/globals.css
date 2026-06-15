@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ════════════════════════════════════════════════════════════════════
+   LVY design tokens — Phase 1 foundation (CSS variables)
+   Source of truth: docs/design.md + docs/brand-rules.md.
+   These mirror the Tailwind tokens so custom CSS / third-party UI
+   (e.g. Stripe Elements) can theme against the same palette.
+   ════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Brand foundation */
+  --cream: #f6f1ea;
+  --sand: #eadfce;
+  --charcoal: #1c1b19;
+  --walnut: #5b3a21;
+  --stone: #8b847c;
+  --ink: #000000;
+  --paper: #ffffff;
+
+  /* Brand palette (Brand Book canonical) */
+  --terracotta: #83382e;
+  --sage: #708058;
+  --clay: #a38270;
+
+  /* Semantic tokens */
+  --color-primary: var(--terracotta);
+  --color-secondary: var(--sage);
+  --color-accent: var(--clay);
+  --color-background: var(--cream);
+  --color-surface: var(--paper);
+  --color-foreground: var(--charcoal);
+  --color-muted: var(--stone);
+  --color-border: #dcd7d1; /* charcoal ~12% over cream */
+  --color-success: var(--sage);
+  --color-warning: var(--clay);
+  --color-destructive: var(--terracotta);
+
+  /* Radius scale */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Elevation (warm, diffuse) */
+  --shadow-xs: 0 1px 2px rgba(28, 27, 25, 0.04);
+  --shadow-sm: 0 2px 8px rgba(28, 27, 25, 0.06);
+  --shadow-md: 0 8px 30px rgba(28, 27, 25, 0.08);
+  --shadow-lg: 0 24px 60px rgba(28, 27, 25, 0.1);
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @layer base {
   html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
   body { @apply font-sans bg-cream text-charcoal; font-feature-settings: "ss01", "cv11"; }
@@ -34,3 +84,15 @@
 
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* Accessibility: honor reduced-motion (docs/design.md §10/§13). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
