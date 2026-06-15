@@ -4,14 +4,15 @@ import { motion } from "framer-motion";
 import {
   Instagram, Twitter, Facebook, Youtube, ArrowUpRight, ArrowRight, MapPin, Check,
 } from "lucide-react";
+import { LvyLogo } from "@/components/brand/LvyLogo";
 
 const SHOP_LINKS = [
   { to: "/shop", label: "All pieces" },
-  { to: "/shop?category=living-room", label: "Living room" },
-  { to: "/shop?category=bedroom", label: "Bedroom" },
-  { to: "/shop?category=dining", label: "Dining" },
-  { to: "/shop?category=outdoor", label: "Outdoor" },
-  { to: "/shop?category=lighting", label: "Lighting" },
+  { to: "/shop?category=wall-hangings", label: "Wall hangings" },
+  { to: "/shop?category=plant-hangers", label: "Plant hangers" },
+  { to: "/shop?category=table-runners", label: "Table runners" },
+  { to: "/shop?category=wall-art", label: "Wall art" },
+  { to: "/shop?category=cushions", label: "Cushions" },
 ];
 
 const STUDIO_LINKS = [
@@ -79,19 +80,19 @@ export default function Footer() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-16 text-[10px] uppercase tracking-[0.4em] text-cream/50">
               <span className="flex items-center gap-3">
-                <span className="w-1 h-1 rounded-full bg-terracotta" /> Hand-crafted in Brooklyn
+                <span className="w-1 h-1 rounded-full bg-terracotta" /> Hand-knotted in small batches
               </span>
               <span className="flex items-center gap-3">
-                <span className="w-1 h-1 rounded-full bg-terracotta" /> Shipping to 48 countries
+                <span className="w-1 h-1 rounded-full bg-terracotta" /> Natural fibres
               </span>
               <span className="flex items-center gap-3">
-                <span className="w-1 h-1 rounded-full bg-terracotta" /> Made to outlive trends
+                <span className="w-1 h-1 rounded-full bg-terracotta" /> Made by hand, felt by soul
               </span>
               <span className="flex items-center gap-3">
-                <span className="w-1 h-1 rounded-full bg-terracotta" /> 5-year warranty
+                <span className="w-1 h-1 rounded-full bg-terracotta" /> Made to order
               </span>
               <span className="flex items-center gap-3">
-                <span className="w-1 h-1 rounded-full bg-terracotta" /> White-glove delivery
+                <span className="w-1 h-1 rounded-full bg-terracotta" /> Quietly crafted
               </span>
             </div>
           ))}
@@ -102,8 +103,9 @@ export default function Footer() {
       <div className="container pt-20 lg:pt-28 pb-16">
         <div className="grid lg:grid-cols-12 gap-10 items-end">
           <div className="lg:col-span-7">
-            <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-5 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" /> The LVY Dispatch
+            <p className="text-[11px] uppercase tracking-[0.3em] text-terracotta mb-5 flex items-center gap-3">
+              <LvyLogo decorative className="h-3 w-auto text-terracotta" />
+              <span aria-hidden className="w-8 h-px bg-terracotta/50" /> The LVY Dispatch
             </p>
             <h2 className="font-display text-5xl lg:text-7xl leading-[0.9] tracking-tightest">
               First look at<br />
@@ -205,7 +207,7 @@ export default function Footer() {
             <div className="flex items-center justify-between text-cream/60">
               <span className="uppercase tracking-wider">Open now</span>
               <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse" />
                 Mon–Sat · 10–18
               </span>
             </div>
@@ -251,20 +253,17 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ═════ GIANT WORDMARK ═════ */}
-      <div
-        aria-hidden
-        className="overflow-hidden leading-none select-none"
-      >
-        <motion.p
-          initial={{ opacity: 0, y: 80 }}
+      {/* ═════ GIANT OFFICIAL LOGO ═════ */}
+      <div aria-hidden className="overflow-hidden leading-none select-none px-6 pt-10 pb-12 lg:pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          className="font-display text-[clamp(8rem,24vw,26rem)] text-center tracking-tightest leading-[0.8] text-cream/[0.08] -mb-[4vw] lg:-mb-[6vw] pb-0 pt-8"
+          className="flex justify-center"
         >
-          lvy<span className="text-terracotta/30">®</span>
-        </motion.p>
+          <LvyLogo decorative className="h-auto w-[min(90%,60rem)] text-cream/[0.07]" />
+        </motion.div>
       </div>
 
       {/* Marquee keyframe — lives in globals via arbitrary class */}

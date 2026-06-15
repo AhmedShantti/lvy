@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Move3d } from "lucide-react";
-import Product3D from "@/components/three/Product3D";
+import { ArrowRight } from "lucide-react";
+import { LvyLogo } from "@/components/brand/LvyLogo";
 
 const DEFAULT_HERO_IMAGES = [
   "/toa-heftiba-LE3UlRqIFR0-unsplash.jpg",
@@ -13,12 +13,13 @@ const DEFAULT_HERO_IMAGES = [
 
 export default function Hero({ data }: { data?: any }) {
   const images = (data?.images && data.images.length > 0) ? data.images : DEFAULT_HERO_IMAGES;
-  const eyebrow = data?.eyebrow ?? "Spring Collection · 2026";
-  const title = data?.title ?? "Furniture you can";
-  const titleAccent = data?.titleAccent ?? "turn around.";
-  const body = data?.body ?? "Drag, spin, and live with every piece in 3D before it lives with you. Hand-crafted in our studio — delivered with care.";
-  const ctaPrimary = data?.ctaPrimary ?? { label: "Shop Collection", to: "/shop" };
+  const eyebrow = data?.eyebrow ?? "Handcrafted Macramé · New Collection";
+  const title = data?.title ?? "Crafted for calm,";
+  const titleAccent = data?.titleAccent ?? "made to belong.";
+  const body = data?.body ?? "Handcrafted macramé that brings softness and balance into modern spaces — where design is not loud, but deeply felt. Made by hand, in small batches, from natural fibres.";
+  const ctaPrimary = data?.ctaPrimary ?? { label: "Shop the Collection", to: "/shop" };
   const ctaSecondary = data?.ctaSecondary ?? { label: "Our Story", to: "/about" };
+  const featured = data?.featured ?? { label: "Luna Wall Hanging", price: "$180" };
 
   const [heroIndex] = useState(() => Math.floor(Math.random() * images.length));
   const heroImage = images[heroIndex];
@@ -43,9 +44,10 @@ export default function Hero({ data }: { data?: any }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.8 }}
-            className="text-xs uppercase tracking-[0.4em] text-muted mb-6 flex items-center gap-3"
+            className="text-[11px] uppercase tracking-[0.3em] text-terracotta mb-6 flex items-center gap-3"
           >
-            <span className="w-8 h-px bg-muted" />
+            <LvyLogo decorative className="h-3 w-auto text-terracotta" />
+            <span aria-hidden className="w-8 h-px bg-terracotta/50" />
             {eyebrow}
           </motion.p>
 
@@ -81,9 +83,6 @@ export default function Hero({ data }: { data?: any }) {
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link to={ctaSecondary.to} className="btn btn-outline">{ctaSecondary.label}</Link>
-            <span className="text-xs uppercase tracking-widest text-muted flex items-center gap-2 ml-2">
-              <Move3d size={14} /> Drag to rotate
-            </span>
           </motion.div>
         </div>
 
@@ -99,7 +98,7 @@ export default function Hero({ data }: { data?: any }) {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-0 bottom-0 w-[68%] h-[78%] bg-terracotta/85"
+            className="absolute left-0 bottom-0 w-[68%] h-[78%] rounded-t-full bg-terracotta/90"
           />
 
           {/* Hairline grid marker — top-left corner of the terracotta block */}
@@ -111,24 +110,24 @@ export default function Hero({ data }: { data?: any }) {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute right-0 top-0 w-[72%] h-[88%] overflow-hidden shadow-2xl"
+            className="absolute right-0 top-0 w-[72%] h-[88%] overflow-hidden rounded-t-full border border-charcoal/10 shadow-md"
           >
             <img
               src={heroImage}
-              alt="Featured piece"
+              alt="Handcrafted LVY macramé in a calm, sunlit interior"
               className="absolute inset-0 w-full h-full object-cover object-center"
             />
             {/* gentle top-down vignette so corner labels read */}
             <div className="absolute inset-0 bg-gradient-to-b from-charcoal/30 via-transparent to-charcoal/40" />
 
-            {/* Top-left serif counter inside the image */}
-            <div className="absolute top-5 left-5 text-cream pointer-events-none">
+            {/* Serif counter inside the arch (kept clear of rounded top corners) */}
+            <div className="absolute top-[9%] left-1/2 -translate-x-1/2 text-center text-cream pointer-events-none">
               <p className="font-display text-2xl leading-none tabular-nums">
                 {indexLabel}
                 <span className="text-cream/50 text-base"> / {totalLabel}</span>
               </p>
               <p className="text-[10px] uppercase tracking-[0.3em] text-cream/80 mt-2">
-                Spring · 2026
+                Handcrafted · 2026
               </p>
             </div>
 
@@ -136,9 +135,9 @@ export default function Hero({ data }: { data?: any }) {
             <div className="absolute bottom-5 left-5 right-5 flex justify-between items-end text-cream pointer-events-none">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-cream/70">Featured</p>
-                <p className="font-display text-xl mt-1">Sheen Lounge Chair</p>
+                <p className="font-display text-xl mt-1">{featured.label}</p>
               </div>
-              <p className="font-display text-xl tabular-nums">$1,890</p>
+              <p className="font-display text-xl tabular-nums">{featured.price}</p>
             </div>
           </motion.div>
 

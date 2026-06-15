@@ -4,9 +4,23 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, Star, ArrowRight } from "lucide-react";
 import { useRef } from "react";
 import { api } from "@/lib/api";
+import { LvyLogo } from "@/components/brand/LvyLogo";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+function Eyebrow({ children, tone = "terracotta" }: { children: React.ReactNode; tone?: "terracotta" | "cream" }) {
+  const color = tone === "cream" ? "text-cream/70" : "text-terracotta";
+  return (
+    <p className={`flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] ${color}`}>
+      <LvyLogo decorative className={`h-3 w-auto ${tone === "cream" ? "text-cream/70" : "text-terracotta"}`} />
+      <span aria-hidden className={`h-px w-8 ${tone === "cream" ? "bg-cream/30" : "bg-terracotta/50"}`} />
+      {children}
+    </p>
+  );
+}
 
 export default function FeaturedShowcase({ data: content }: { data?: any }) {
-  const eyebrow = content?.eyebrow ?? "New in · Curated";
+  const eyebrow = content?.eyebrow ?? "The Collection · Curated";
   const limit = content?.limit ?? 8;
 
   const { data } = useQuery({
@@ -22,53 +36,50 @@ export default function FeaturedShowcase({ data: content }: { data?: any }) {
   const stripItems = items.slice(5);
 
   return (
-    <div>
-      {/* ═════ Hero feature — full bleed ═════ */}
+    <div className="bg-cream">
       <HeroFeature product={hero} eyebrow={eyebrow} />
 
-      {/* ═════ Alternating editorial cards ═════ */}
       {showcaseItems.map((p: any, i: number) => (
         <EditorialCard key={p.id} product={p} index={i} reverse={i % 2 !== 0} />
       ))}
 
-      {/* ═════ Scroll strip ═════ */}
       {stripItems.length > 0 && (
-        <section className="bg-cream py-16 lg:py-24">
-          <div className="container mb-8 flex items-end justify-between">
-            <p className="text-xs uppercase tracking-[0.4em] text-muted">More to discover</p>
+        <section className="bg-cream py-20 lg:py-28">
+          <div className="container mb-10 flex items-end justify-between">
+            <Eyebrow>More to discover</Eyebrow>
             <Link
               to="/shop"
-              className="text-xs uppercase tracking-[0.3em] border-b border-charcoal pb-0.5 flex items-center gap-2 hover:gap-3 transition-all"
+              className="link-underline flex items-center gap-2 pb-0.5 text-[11px] uppercase tracking-[0.3em] text-charcoal"
             >
-              View all <ArrowUpRight size={12} />
+              View all <ArrowUpRight size={13} />
             </Link>
           </div>
           <div className="container">
-            <div className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 scrollbar-hide">
+            <div className="-mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 scrollbar-hide">
               {stripItems.map((p: any, i: number) => (
                 <motion.div
                   key={p.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.08 }}
-                  className="flex-shrink-0 w-[70%] md:w-[35%] lg:w-[23%] snap-start"
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.6, delay: i * 0.06, ease: EASE }}
+                  className="w-[72%] flex-shrink-0 snap-start md:w-[36%] lg:w-[23%]"
                 >
-                  <Link to={`/product/${p.slug}`} className="block group">
-                    <div className="aspect-[3/4] overflow-hidden bg-sand/40 mb-3">
+                  <Link to={`/product/${p.slug}`} className="group block">
+                    <div className="mb-4 aspect-[3/4] overflow-hidden rounded-t-[3rem] border border-charcoal/10 bg-sand/50">
                       <img
                         src={p.images[0]}
                         alt={p.name}
                         loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
+                        className="h-full w-full object-cover transition duration-700 ease-soft group-hover:scale-[1.04]"
                       />
                     </div>
-                    <div className="flex justify-between items-start">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-display text-lg">{p.name}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-muted mt-1">{p.material}</p>
+                        <h3 className="font-display text-xl leading-tight">{p.name}</h3>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-stone">{p.material}</p>
                       </div>
-                      <p className="font-display text-lg tabular-nums">${Number(p.price).toFixed(0)}</p>
+                      <p className="font-display text-lg tabular-nums text-terracotta">${Number(p.price).toFixed(0)}</p>
                     </div>
                   </Link>
                 </motion.div>
@@ -81,93 +92,80 @@ export default function FeaturedShowcase({ data: content }: { data?: any }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════
-   Hero feature — the first piece, full-bleed immersive
-   ═══════════════════════════════════════════════════════ */
+/* ─── Hero feature — first piece, cinematic ─── */
 function HeroFeature({ product: p, eyebrow }: { product: any; eyebrow: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
+  const imgY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
 
   return (
-    <section ref={ref} className="relative bg-charcoal overflow-hidden">
-      <div className="grid lg:grid-cols-12 min-h-[90vh]">
-        {/* Image — 7 columns, parallax */}
-        <div className="lg:col-span-7 relative overflow-hidden">
+    <section ref={ref} className="relative overflow-hidden bg-charcoal text-cream">
+      <div className="grid min-h-[88vh] lg:grid-cols-12">
+        {/* Image */}
+        <div className="relative overflow-hidden lg:col-span-7">
           <motion.img
             style={{ y: imgY }}
             src={p.images[0]}
             alt={p.name}
-            className="absolute inset-0 w-full h-full object-cover scale-110"
+            className="absolute inset-0 h-full w-full scale-110 object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-charcoal/90 hidden lg:block" />
-          <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent lg:hidden" />
-
-          {/* Serial stamp */}
-          <div className="absolute top-8 left-8 text-cream/80 mix-blend-difference z-10">
-            <p className="font-display text-3xl tabular-nums leading-none">01</p>
-            <p className="text-[10px] uppercase tracking-[0.3em] mt-2 opacity-70">Featured</p>
+          <div aria-hidden className="absolute inset-0 hidden bg-gradient-to-r from-transparent via-transparent to-charcoal lg:block" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/30 to-transparent lg:hidden" />
+          <div aria-hidden className="absolute left-8 top-8 z-10 text-cream/80 mix-blend-difference">
+            <p className="font-display text-3xl leading-none tabular-nums">01</p>
+            <p className="mt-2 text-[10px] uppercase tracking-[0.3em] opacity-70">Featured piece</p>
           </div>
         </div>
 
-        {/* Content — 5 columns */}
-        <div className="lg:col-span-5 flex items-center relative z-10">
+        {/* Content */}
+        <div className="relative z-10 flex items-center lg:col-span-5">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="px-8 lg:px-12 xl:px-16 py-16 lg:py-0"
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.9, ease: EASE }}
+            className="px-8 py-16 lg:px-14 lg:py-0 xl:px-16"
           >
-            <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-6 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" /> {eyebrow}
-            </p>
+            <Eyebrow tone="cream">{eyebrow}</Eyebrow>
 
-            <h2 className="font-display text-5xl lg:text-6xl xl:text-7xl text-cream leading-[0.92] tracking-tightest">
+            <h2 className="mt-7 font-display text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[0.95] tracking-tightest text-cream">
               {p.name}
             </h2>
 
-            <div className="flex items-baseline gap-4 mt-6">
-              <p className="font-display text-3xl text-terracotta tabular-nums">
-                ${Number(p.price).toLocaleString()}
-              </p>
+            <div className="mt-5 flex items-baseline gap-4">
+              <p className="font-display text-3xl tabular-nums text-terracotta">${Number(p.price).toLocaleString()}</p>
               {p.compareAt && Number(p.compareAt) > Number(p.price) && (
-                <p className="text-lg text-cream/30 line-through tabular-nums">
-                  ${Number(p.compareAt).toLocaleString()}
-                </p>
+                <p className="text-lg tabular-nums text-cream/30 line-through">${Number(p.compareAt).toLocaleString()}</p>
               )}
             </div>
 
-            <div className="w-12 h-px bg-cream/15 my-8" />
+            <div aria-hidden className="my-8 h-px w-12 bg-cream/20" />
 
-            <p className="text-cream/60 leading-relaxed max-w-md">
-              {p.description}
-            </p>
+            <p className="max-w-md leading-relaxed text-cream/65">{p.description}</p>
 
-            <div className="flex items-center gap-4 mt-6">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star key={n} size={14} className={n <= Math.round(p.rating) ? "fill-terracotta text-terracotta" : "text-cream/15"} />
-                ))}
-              </div>
-              <span className="text-xs text-cream/40 tabular-nums">{Number(p.rating).toFixed(1)}</span>
-              <span className="w-px h-3 bg-cream/15" />
-              <span className="text-xs text-cream/40 uppercase tracking-wider">{p.material}</span>
-              <span className="w-px h-3 bg-cream/15" />
-              <span className="text-xs text-cream/40 uppercase tracking-wider">{p.color}</span>
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-cream/45">
+              <span className="flex items-center gap-1.5" aria-label={`Rated ${Number(p.rating).toFixed(1)} out of 5`}>
+                <span className="flex" aria-hidden>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star key={n} size={13} className={n <= Math.round(p.rating) ? "fill-terracotta text-terracotta" : "text-cream/20"} />
+                  ))}
+                </span>
+                <span className="tabular-nums">{Number(p.rating).toFixed(1)}</span>
+              </span>
+              <span aria-hidden className="h-3 w-px bg-cream/20" />
+              <span className="uppercase tracking-[0.2em]">{p.material}</span>
+              <span aria-hidden className="h-3 w-px bg-cream/20" />
+              <span className="uppercase tracking-[0.2em]">{p.color}</span>
             </div>
 
-            <div className="flex items-center gap-4 mt-10">
-              <Link
-                to={`/product/${p.slug}`}
-                className="btn btn-primary bg-terracotta hover:bg-terracotta/90 group"
-              >
+            <div className="mt-10 flex items-center gap-6">
+              <Link to={`/product/${p.slug}`} className="btn bg-terracotta text-cream hover:bg-terracotta/90 group">
                 View piece
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/shop"
-                className="text-xs uppercase tracking-[0.3em] text-cream/50 border-b border-cream/20 pb-0.5 hover:text-cream hover:gap-3 inline-flex items-center gap-2 transition-all"
+                className="link-underline inline-flex items-center gap-2 pb-0.5 text-[11px] uppercase tracking-[0.3em] text-cream/60 hover:text-cream"
               >
                 Shop all <ArrowUpRight size={12} />
               </Link>
@@ -179,99 +177,79 @@ function HeroFeature({ product: p, eyebrow }: { product: any; eyebrow: string })
   );
 }
 
-/* ═══════════════════════════════════════════════════════
-   Editorial card — alternating image/text
-   ═══════════════════════════════════════════════════════ */
+/* ─── Editorial card — alternating image / text ─── */
 function EditorialCard({ product: p, index, reverse }: { product: any; index: number; reverse: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
+  const imgY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
   const num = String(index + 2).padStart(2, "0");
 
   return (
-    <section
-      ref={ref}
-      className={`relative ${index % 2 === 0 ? "bg-cream" : "bg-sand/40"}`}
-    >
-      <div className={`grid lg:grid-cols-12 min-h-[75vh] ${reverse ? "direction-rtl" : ""}`}
+    <section ref={ref} className={`relative ${index % 2 === 0 ? "bg-cream" : "bg-sand/50"}`}>
+      <div
+        className="grid min-h-[78vh] lg:grid-cols-12"
         style={{ direction: reverse ? "rtl" : "ltr" }}
       >
-        {/* Image — 7 columns */}
-        <div className="lg:col-span-7 relative overflow-hidden aspect-[4/3] lg:aspect-auto" style={{ direction: "ltr" }}>
+        {/* Image */}
+        <div className="relative aspect-[4/3] overflow-hidden lg:col-span-7 lg:aspect-auto" style={{ direction: "ltr" }}>
           <motion.img
             style={{ y: imgY }}
             src={p.images[0]}
             alt={p.name}
-            className="absolute inset-0 w-full h-full object-cover scale-110"
+            loading="lazy"
+            className="absolute inset-0 h-full w-full scale-110 object-cover"
           />
-
-          {/* Badges */}
-          <div className="absolute top-6 left-6 z-10 flex gap-2">
+          <div className="absolute left-6 top-6 z-10 flex gap-2">
             {p.isNew && (
-              <span className="text-[10px] uppercase tracking-[0.2em] bg-charcoal text-cream px-3 py-1.5">
-                New
-              </span>
+              <span className="bg-charcoal px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-cream">New</span>
             )}
             {p.compareAt && Number(p.compareAt) > Number(p.price) && (
-              <span className="text-[10px] uppercase tracking-[0.2em] bg-terracotta text-cream px-3 py-1.5">
-                Sale
-              </span>
+              <span className="bg-terracotta px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-cream">Sale</span>
             )}
           </div>
-
-          {/* Number watermark */}
-          <div className="absolute bottom-6 right-8 z-10">
-            <p className="font-display text-8xl text-charcoal/[0.08] leading-none tabular-nums">{num}</p>
+          <div aria-hidden className="absolute bottom-6 right-8 z-10">
+            <p className="font-display text-8xl leading-none tabular-nums text-charcoal/[0.07]">{num}</p>
           </div>
         </div>
 
-        {/* Content — 5 columns */}
-        <div className="lg:col-span-5 flex items-center" style={{ direction: "ltr" }}>
+        {/* Content */}
+        <div className="flex items-center lg:col-span-5" style={{ direction: "ltr" }}>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 28 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="px-8 lg:px-12 xl:px-16 py-14 lg:py-0"
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8, ease: EASE }}
+            className="px-8 py-14 lg:px-14 lg:py-0 xl:px-16"
           >
-            <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-4 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" /> {p.category?.name ?? "Piece"}
-            </p>
+            <Eyebrow>{p.category?.name ?? "Macramé"}</Eyebrow>
 
-            <h3 className="font-display text-4xl lg:text-5xl leading-[0.95] tracking-tightest">
+            <h3 className="mt-6 font-display text-[clamp(2rem,3.5vw,3.25rem)] leading-[0.98] tracking-tightest">
               {p.name}
             </h3>
 
-            <p className="font-display text-2xl text-terracotta mt-3 tabular-nums">
-              ${Number(p.price).toLocaleString()}
-            </p>
+            <p className="mt-3 font-display text-2xl tabular-nums text-terracotta">${Number(p.price).toLocaleString()}</p>
 
-            <div className="w-10 h-px bg-charcoal/15 my-6" />
+            <div aria-hidden className="my-6 h-px w-10 bg-charcoal/15" />
 
-            <p className="text-muted leading-relaxed max-w-md">
-              {p.description}
-            </p>
+            <p className="max-w-md leading-relaxed text-stone">{p.description}</p>
 
-            <div className="flex items-center gap-3 mt-5 text-xs text-muted">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star key={n} size={12} className={n <= Math.round(p.rating) ? "fill-terracotta text-terracotta" : "text-charcoal/15"} />
-                ))}
-              </div>
-              <span className="tabular-nums">{Number(p.rating).toFixed(1)}</span>
-              <span className="w-px h-3 bg-charcoal/15" />
-              <span className="uppercase tracking-wider">{p.material}</span>
-              <span className="w-px h-3 bg-charcoal/15" />
-              <span className="uppercase tracking-wider">{p.color}</span>
+            <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-stone">
+              <span className="flex items-center gap-1.5" aria-label={`Rated ${Number(p.rating).toFixed(1)} out of 5`}>
+                <span className="flex" aria-hidden>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star key={n} size={12} className={n <= Math.round(p.rating) ? "fill-terracotta text-terracotta" : "text-charcoal/15"} />
+                  ))}
+                </span>
+                <span className="tabular-nums">{Number(p.rating).toFixed(1)}</span>
+              </span>
+              <span aria-hidden className="h-3 w-px bg-charcoal/15" />
+              <span className="uppercase tracking-[0.2em]">{p.material}</span>
             </div>
 
-            <div className="flex items-center gap-4 mt-8">
-              <Link
-                to={`/product/${p.slug}`}
-                className="btn btn-primary group"
-              >
+            <div className="mt-8">
+              <Link to={`/product/${p.slug}`} className="btn btn-primary group">
                 View piece
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </motion.div>

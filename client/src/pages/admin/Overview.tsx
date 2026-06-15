@@ -78,7 +78,7 @@ export default function AdminOverview() {
               </p>
             </div>
             <div className="text-xs text-muted flex items-center gap-2">
-              <TrendingUp size={14} className="text-emerald-700" /> Paid orders only
+              <TrendingUp size={14} className="text-sage" /> Paid orders only
             </div>
           </div>
           {!ts.data ? (

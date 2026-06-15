@@ -9,7 +9,7 @@ const ICONS = {
 } as const;
 
 const ACCENTS = {
-  success: "border-l-emerald-700",
+  success: "border-l-sage",
   error: "border-l-terracotta",
   info: "border-l-charcoal",
 } as const;
@@ -34,7 +34,7 @@ export default function Toaster() {
               <Icon
                 size={16}
                 className={
-                  t.kind === "success" ? "text-emerald-700 mt-0.5" :
+                  t.kind === "success" ? "text-sage mt-0.5" :
                   t.kind === "error" ? "text-terracotta mt-0.5" :
                   "text-charcoal mt-0.5"
                 }

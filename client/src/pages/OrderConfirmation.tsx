@@ -109,8 +109,8 @@ export default function OrderConfirmation() {
       )}
 
       {claimed && (
-        <div className="mb-10 border border-emerald-700/30 bg-emerald-50 p-5 flex items-center gap-3">
-          <Check size={18} className="text-emerald-700" />
+        <div className="mb-10 border border-sage/30 bg-sage/10 p-5 flex items-center gap-3">
+          <Check size={18} className="text-sage" />
           <p className="text-sm">Order linked to your account. View it anytime in <Link to="/account" className="underline">your account</Link>.</p>
         </div>
       )}

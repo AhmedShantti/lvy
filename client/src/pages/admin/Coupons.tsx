@@ -109,7 +109,7 @@ export default function AdminCoupons() {
                       onClick={() => toggleActive(c.id)}
                       title="Toggle active"
                       className={`text-[10px] uppercase tracking-wider px-2 py-0.5 transition ${
-                        c.active ? "bg-emerald-700 text-cream hover:bg-emerald-800" : "bg-charcoal/10 text-muted hover:bg-charcoal/20"
+                        c.active ? "bg-sage text-cream hover:bg-sage/90" : "bg-charcoal/10 text-muted hover:bg-charcoal/20"
                       }`}
                     >
                       {c.active ? "Active" : "Inactive"}

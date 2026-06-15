@@ -144,7 +144,7 @@ export default function AdminReviews() {
                       {!r.approved ? (
                         <button
                           onClick={() => approve(r.id)}
-                          className="px-3 py-1.5 bg-emerald-700 text-cream text-xs uppercase tracking-wider hover:bg-emerald-800 flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-sage text-cream text-xs uppercase tracking-wider hover:bg-sage/90 flex items-center gap-1.5"
                         >
                           <Check size={12} /> Approve
                         </button>

@@ -712,7 +712,7 @@ export default function Shipping() {
 function CellValue({ v, highlight = false }: { v: string | boolean; highlight?: boolean }) {
   if (typeof v === "boolean") {
     return v ? (
-      <Check size={16} className={highlight ? "text-terracotta" : "text-emerald-700"} />
+      <Check size={16} className={highlight ? "text-terracotta" : "text-sage"} />
     ) : (
       <span className="text-charcoal/20">—</span>
     );

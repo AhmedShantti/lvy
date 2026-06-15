@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Heart, Truck, Shield, RotateCcw, Move3d, Image as ImageIcon,
+  Heart, Truck, RotateCcw, Move3d, Image as ImageIcon,
   Minus, Plus, Star, Check, ChevronRight, X, Share2, Ruler, Leaf,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -11,6 +11,19 @@ import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
 import Product3D from "@/components/three/Product3D";
 import ReviewForm from "@/components/ui/ReviewForm";
+import ProductCard from "@/components/ui/ProductCard";
+import { LvyLogo } from "@/components/brand/LvyLogo";
+
+/** Brand eyebrow — consistent with the Home design system. */
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-terracotta">
+      <LvyLogo decorative className="h-3 w-auto text-terracotta" />
+      <span aria-hidden className="h-px w-8 bg-terracotta/50" />
+      {children}
+    </p>
+  );
+}
 
 function Stars({ value, size = 14 }: { value: number; size?: number }) {
   return (
@@ -171,8 +184,8 @@ export default function ProductDetail() {
       <div className="container grid lg:grid-cols-12 gap-8 lg:gap-14">
         {/* Gallery — 7/12 */}
         <div className="lg:col-span-7 relative">
-          {/* Terracotta accent block behind image */}
-          <div className="absolute -left-4 lg:-left-10 bottom-8 w-[55%] h-[65%] bg-terracotta/80 hidden lg:block" />
+          {/* Terracotta accent block behind image (subtle arch motif) */}
+          <div aria-hidden className="absolute -left-4 lg:-left-10 bottom-8 w-[55%] h-[65%] rounded-t-full bg-terracotta/85 hidden lg:block" />
 
           {/* Vertical thumbnail rail (desktop) */}
           <div className="hidden lg:flex absolute -left-4 top-8 flex-col gap-3 z-20">
@@ -196,7 +209,7 @@ export default function ProductDetail() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="relative aspect-[4/5] lg:ml-16 bg-gradient-to-br from-sand/40 to-sand/10 overflow-hidden shadow-2xl"
+            className="relative aspect-[4/5] lg:ml-16 bg-gradient-to-br from-sand/40 to-sand/10 overflow-hidden rounded-t-[2.5rem] border border-charcoal/10 shadow-md"
           >
             {/* Serial counter top-left */}
             <div className="absolute top-6 left-6 z-20 text-cream pointer-events-none mix-blend-difference">
@@ -289,12 +302,9 @@ export default function ProductDetail() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="lg:col-span-5 lg:sticky lg:top-24 lg:self-start"
         >
-          <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-4 flex items-center gap-3">
-            <span className="w-8 h-px bg-terracotta" />
-            {p.category.name}
-          </p>
+          <Eyebrow>{p.category.name}</Eyebrow>
 
-          <h1 className="font-display text-5xl lg:text-6xl leading-[0.95] tracking-tightest mb-5">
+          <h1 className="font-display text-[clamp(2.5rem,4.5vw,3.75rem)] leading-[0.95] tracking-tightest mb-5">
             {p.name}
           </h1>
 
@@ -330,7 +340,7 @@ export default function ProductDetail() {
           {p.variants?.length > 0 && (
             <div className="mb-8">
               <p className="text-xs uppercase tracking-[0.3em] text-muted mb-3">
-                Finish · <span className="text-charcoal">{p.variants.find((v: any) => v.id === variantId)?.name ?? "Select"}</span>
+                Option · <span className="text-charcoal">{p.variants.find((v: any) => v.id === variantId)?.name ?? "Select"}</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {p.variants.map((v: any) => (
@@ -362,8 +372,8 @@ export default function ProductDetail() {
                 Only {stockLevel} left — order soon
               </span>
             ) : (
-              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-emerald-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700" /> In stock · Ships in 2-3 days
+              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-sage">
+                <span className="w-1.5 h-1.5 rounded-full bg-sage" /> In stock · Ready to ship
               </span>
             )}
           </div>
@@ -392,32 +402,30 @@ export default function ProductDetail() {
             <button
               onClick={handleAdd}
               disabled={outOfStock}
-              className="btn btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn btn-terracotta flex-1 text-sm uppercase tracking-[0.15em] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {outOfStock ? "Sold Out" : "Add to Bag"}
+              {outOfStock ? "Sold Out" : `Add to Bag — $${Number(p.price).toLocaleString()}`}
             </button>
             <button
               onClick={handleWishlist}
               className={`btn btn-outline transition ${inWishlist ? "bg-terracotta/10 border-terracotta" : ""}`}
-              aria-label="Wishlist"
+              aria-label={inWishlist ? "Remove from wishlist" : "Save to wishlist"}
               aria-pressed={inWishlist}
             >
               <Heart size={18} className={inWishlist ? "fill-terracotta text-terracotta" : ""} />
             </button>
           </div>
 
-          <button className="btn btn-outline w-full mb-8">Buy it now — 1-Click Checkout</button>
-
           {/* Trust icons */}
-          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-charcoal/10 text-xs">
-            <div className="flex flex-col items-center text-center gap-2">
-              <Truck size={20} /><span className="text-muted">Free shipping<br />over $1,500</span>
+          <div className="mt-8 grid grid-cols-3 gap-4 border-t border-charcoal/10 pt-6 text-xs">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <Leaf size={20} className="text-terracotta/80" /><span className="text-muted">Hand-knotted<br />with care</span>
             </div>
-            <div className="flex flex-col items-center text-center gap-2">
-              <RotateCcw size={20} /><span className="text-muted">30-day<br />free returns</span>
+            <div className="flex flex-col items-center gap-2 text-center">
+              <Truck size={20} className="text-terracotta/80" /><span className="text-muted">Carbon-neutral<br />shipping</span>
             </div>
-            <div className="flex flex-col items-center text-center gap-2">
-              <Shield size={20} /><span className="text-muted">5-year<br />warranty</span>
+            <div className="flex flex-col items-center gap-2 text-center">
+              <RotateCcw size={20} className="text-terracotta/80" /><span className="text-muted">30-day<br />returns</span>
             </div>
           </div>
         </motion.div>
@@ -426,41 +434,39 @@ export default function ProductDetail() {
       {/* ═════ Editorial break — "Crafted with intent" ═════ */}
       <section className="container mt-32 lg:mt-40 grid lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-5">
-          <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-5 flex items-center gap-3">
-            <span className="w-8 h-px bg-terracotta" /> Craftsmanship
-          </p>
+          <Eyebrow>Craftsmanship</Eyebrow>
           <h2 className="font-display text-4xl lg:text-5xl leading-[1.05] mb-6">
             Made by hand,<br />
-            <em className="italic font-light text-terracotta">built to last.</em>
+            <em className="italic font-light text-terracotta">felt by soul.</em>
           </h2>
-          <p className="text-muted leading-relaxed mb-8">
-            Every {p.name.toLowerCase()} is hand-finished in our studio. We source {p.material.toLowerCase()}
-            from responsibly managed forests and finish each piece with natural oils — never synthetic coatings.
-            The result is a piece that ages with character and lives longer than it trends.
+          <p className="text-stone leading-relaxed mb-8">
+            Every {p.name.toLowerCase()} is knotted by hand in our studio from {p.material.toLowerCase()},
+            using time-honoured macramé techniques — softness and balance brought into the room,
+            one intentional knot at a time. Made to last, and made to belong.
           </p>
           <div className="space-y-4">
             <div className="flex items-start gap-4">
               <Leaf size={18} className="text-terracotta mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium">Sustainably sourced</p>
-                <p className="text-sm text-muted">FSC-certified {p.material.toLowerCase()}, natural finishes.</p>
+                <p className="font-medium">Natural fibres</p>
+                <p className="text-sm text-stone">Undyed {p.material.toLowerCase()} — never synthetic blends or coatings.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <Ruler size={18} className="text-terracotta mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium">Precision joinery</p>
-                <p className="text-sm text-muted">Mortise-and-tenon frame, no nails or glue on structural joints.</p>
+                <p className="font-medium">Hand-knotted</p>
+                <p className="text-sm text-stone">Tied slowly and deliberately, in small batches, by skilled artisans.</p>
               </div>
             </div>
           </div>
         </div>
         <div className="lg:col-span-7 relative h-[60vh]">
-          <div className="absolute right-0 top-0 w-[85%] h-full overflow-hidden">
-            <img src={p.images[Math.min(1, totalImages - 1)]} alt="" className="w-full h-full object-cover" />
+          <div className="absolute right-0 top-0 w-[85%] h-full overflow-hidden rounded-t-[2.5rem]">
+            <img src={p.images[Math.min(1, totalImages - 1)]} alt={`${p.name} detail`} className="w-full h-full object-cover" />
           </div>
-          <div className="absolute left-0 bottom-0 w-[45%] h-[55%] overflow-hidden border-8 border-cream shadow-2xl">
-            <img src={p.images[Math.min(2, totalImages - 1)]} alt="" className="w-full h-full object-cover" />
+          <div className="absolute left-0 bottom-0 w-[45%] h-[55%] overflow-hidden border-8 border-cream shadow-md">
+            <img src={p.images[Math.min(2, totalImages - 1)]} alt={`${p.name} in context`} className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -500,9 +506,9 @@ export default function ProductDetail() {
               <div className="space-y-4 text-muted leading-relaxed">
                 <p>{p.description}</p>
                 <p>
-                  Designed in our studio and built to last, this piece blends timeless silhouettes
-                  with modern comfort. Each detail — from the hand-finished edges to the webbed
-                  suspension beneath the cushions — is considered for how you actually live with it.
+                  Designed in our studio and made to belong, this piece blends timeless silhouettes
+                  with quiet, tactile warmth. Each detail — from the tension of every knot to the
+                  natural finish of the fibres — is considered for how you actually live with it.
                 </p>
               </div>
             )}
@@ -528,16 +534,16 @@ export default function ProductDetail() {
             {tab === "shipping" && (
               <div className="space-y-6 text-muted leading-relaxed">
                 <div>
-                  <p className="font-medium text-charcoal mb-2">White-glove delivery</p>
-                  <p>We bring it inside, place it exactly where you want it, and remove all packaging. Available in 30+ cities worldwide.</p>
+                  <p className="font-medium text-charcoal mb-2">Thoughtfully packaged</p>
+                  <p>Each piece is wrapped with care and shipped carbon-neutral, ready to bring calm into your space.</p>
                 </div>
                 <div>
-                  <p className="font-medium text-charcoal mb-2">Free over $1,500</p>
-                  <p>Standard shipping is free on orders above $1,500. Expedited available at checkout.</p>
+                  <p className="font-medium text-charcoal mb-2">Made with intention</p>
+                  <p>Knotted by hand in small batches from natural fibres — so every piece arrives a little different, and entirely its own.</p>
                 </div>
                 <div>
                   <p className="font-medium text-charcoal mb-2">30-day returns</p>
-                  <p>Not the right fit? Return it within 30 days for a full refund — we cover pickup.</p>
+                  <p>Not the right fit? Return it within 30 days for a full refund.</p>
                 </div>
               </div>
             )}
@@ -549,10 +555,8 @@ export default function ProductDetail() {
       <section id="reviews" className="container mt-32">
         <div className="flex items-end justify-between border-b border-charcoal/15 pb-8 mb-12">
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-4 flex items-center gap-3">
-              <span className="w-8 h-px bg-terracotta" /> What people say
-            </p>
-            <h2 className="font-display text-4xl lg:text-5xl">Reviews</h2>
+            <Eyebrow>What people say</Eyebrow>
+            <h2 className="font-display text-4xl lg:text-5xl tracking-tightest">Reviews</h2>
           </div>
           <button onClick={() => setShowForm((s) => !s)} className="btn btn-outline hidden md:block">
             {showForm ? "Close form" : "Write a review"}
@@ -656,39 +660,21 @@ export default function ProductDetail() {
         <section className="container mt-32">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-terracotta mb-4 flex items-center gap-3">
-                <span className="w-8 h-px bg-terracotta" /> Continue exploring
-              </p>
-              <h2 className="font-display text-4xl lg:text-5xl">You may also like</h2>
+              <Eyebrow>Continue exploring</Eyebrow>
+              <h2 className="font-display text-4xl lg:text-5xl tracking-tightest">You may also like</h2>
             </div>
             <Link to="/shop" className="btn btn-outline hidden md:inline-flex">View all</Link>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12 md:gap-x-6">
             {data.related.map((r: any, i: number) => (
               <motion.div
                 key={r.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
+                transition={{ duration: 0.5, delay: (i % 4) * 0.06 }}
               >
-                <Link to={`/product/${r.slug}`} className="block group">
-                  <div className="aspect-[3/4] overflow-hidden bg-sand/40 relative">
-                    <img
-                      src={r.images[0]}
-                      alt={r.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-                    />
-                    <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 transition" />
-                  </div>
-                  <div className="mt-4 flex justify-between items-start">
-                    <div>
-                      <p className="font-display text-lg leading-tight">{r.name}</p>
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-muted mt-1">{r.material}</p>
-                    </div>
-                    <p className="font-display text-lg tabular-nums">${Number(r.price).toFixed(0)}</p>
-                  </div>
-                </Link>
+                <ProductCard product={r} />
               </motion.div>
             ))}
           </div>
@@ -707,7 +693,7 @@ export default function ProductDetail() {
         <button
           onClick={handleAdd}
           disabled={outOfStock}
-          className="btn btn-primary flex-1 disabled:opacity-50"
+          className="btn btn-terracotta flex-1 text-sm uppercase tracking-[0.15em] disabled:opacity-50"
         >
           {outOfStock ? "Sold Out" : "Add to Bag"}
         </button>

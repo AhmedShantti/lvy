@@ -188,7 +188,7 @@ export default function AdminContent() {
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleEnabled(s.id, !s.enabled); }}
                     className={`flex items-center gap-1.5 text-xs uppercase tracking-wider transition ${
-                      s.enabled ? "text-emerald-700" : "text-muted"
+                      s.enabled ? "text-sage" : "text-muted"
                     }`}
                   >
                     {s.enabled ? <Eye size={14} /> : <EyeOff size={14} />}

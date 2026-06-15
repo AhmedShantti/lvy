@@ -33,7 +33,7 @@ export function StatCard({ label, value, delta, accent }: {
     <div className={`p-6 border ${accent ? "bg-charcoal text-cream border-charcoal" : "bg-cream border-charcoal/10"}`}>
       <p className={`text-[10px] uppercase tracking-[0.3em] ${accent ? "text-cream/60" : "text-muted"}`}>{label}</p>
       <p className="font-display text-4xl mt-3 tabular-nums">{value}</p>
-      {delta && <p className={`text-xs mt-2 ${accent ? "text-cream/70" : "text-emerald-700"}`}>{delta}</p>}
+      {delta && <p className={`text-xs mt-2 ${accent ? "text-cream/70" : "text-sage"}`}>{delta}</p>}
     </div>
   );
 }
