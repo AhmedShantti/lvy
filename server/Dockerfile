@@ -15,3 +15,5 @@ RUN npm run build
 EXPOSE 4000
 
 CMD ["npm", "start"]
+
+RUN apt-get update -y && apt-get install -y openssl
