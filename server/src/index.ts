@@ -30,7 +30,8 @@ app.use("/api/v1", router);
 
 app.use(errorHandler);
 
-const port = Number(process.env.PORT ?? 4000);
-app.listen(port, () => {
-  console.log(`🛋  LVY API ready on http://localhost:${port}`);
+const PORT = Number(process.env.PORT) || 4000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on ${PORT}`);
 });
