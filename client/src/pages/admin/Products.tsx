@@ -1,7 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit2, Trash2, Image as ImageIcon, X, GripVertical } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Image as ImageIcon, X, GripVertical, Upload, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { uploadImage } from "@/lib/upload";
 import { toast, errMessage } from "@/store/toast";
 import { Page, Card, LoadingRow, EmptyState, Modal, fmtMoney } from "./_shared";
 import MediaPicker from "@/components/admin/MediaPicker";
@@ -34,6 +35,24 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState<ProductForm | null>(null);
   const [mediaOpen, setMediaOpen] = useState(false);
   const [variantsFor, setVariantsFor] = useState<{ id: string; name: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const uploadFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0 || !editing) return;
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const f of Array.from(files)) urls.push(await uploadImage(f));
+      setEditing((prev) => (prev ? { ...prev, images: [...prev.images, ...urls] } : prev));
+      toast.success(`Uploaded ${urls.length} image${urls.length === 1 ? "" : "s"}`);
+    } catch (e) {
+      toast.error(errMessage(e));
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
 
   const products = useQuery({
     queryKey: ["admin-products"],
@@ -279,6 +298,23 @@ export default function AdminProducts() {
                     )}
                   </div>
                 ))}
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  hidden
+                  onChange={(e) => uploadFiles(e.target.files)}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="w-20 h-24 border-2 border-dashed border-charcoal/20 hover:border-charcoal flex flex-col items-center justify-center transition gap-1 disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 size={18} className="animate-spin text-muted" /> : <Upload size={18} className="text-muted" />}
+                  <span className="text-[9px] uppercase tracking-wider text-muted">{uploading ? "Uploading" : "Upload"}</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setMediaOpen(true)}

@@ -1,5 +1,6 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { prisma } from "../lib/prisma.js";
@@ -865,5 +866,57 @@ adminRouter.put("/settings/:key", async (req, res, next) => {
       create: { key: req.params.key, value },
     });
     res.json({ setting });
+  } catch (e) { next(e); }
+});
+
+// ═════ Image uploads → Supabase Storage ═════
+const SUPABASE_URL = process.env.SUPABASE_URL?.replace(/\/$/, "");
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET ?? "lvy-media";
+let bucketEnsured = false;
+
+// Create the public bucket on first upload (idempotent — ignores "already exists").
+async function ensureBucket() {
+  if (bucketEnsured || !SUPABASE_URL || !SUPABASE_KEY) return;
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ id: SUPABASE_BUCKET, name: SUPABASE_BUCKET, public: true }),
+  });
+  if (res.ok || res.status === 400 || res.status === 409) bucketEnsured = true;
+}
+
+adminRouter.post("/upload", express.raw({ type: () => true, limit: "20mb" }), async (req, res, next) => {
+  try {
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      throw new HttpError(500, "Image storage is not configured — set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
+    }
+    const contentType = String(req.headers["content-type"] || "");
+    if (!contentType.startsWith("image/")) throw new HttpError(400, "Only image files are allowed");
+    const buffer = req.body as Buffer;
+    if (!Buffer.isBuffer(buffer) || buffer.length === 0) throw new HttpError(400, "Empty file");
+
+    await ensureBucket();
+
+    const ext = ((contentType.split("/")[1] || "bin").split("+")[0]).replace(/[^a-z0-9]/gi, "").slice(0, 5) || "bin";
+    const key = `${Date.now()}-${randomUUID()}.${ext}`;
+
+    const up = await fetch(`${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${key}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": contentType,
+        "x-upsert": "true",
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+      body: new Uint8Array(buffer),
+    });
+    if (!up.ok) {
+      const detail = await up.text().catch(() => "");
+      throw new HttpError(502, `Storage upload failed (${up.status}): ${detail.slice(0, 200)}`);
+    }
+
+    const url = `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${key}`;
+    res.status(201).json({ url });
   } catch (e) { next(e); }
 });
