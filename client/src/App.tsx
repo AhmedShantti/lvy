@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Account from "./pages/Account";
 import Admin from "./pages/Admin";
+import ProtectedRoute from "./components/ProtectedRoute";
 import About from "./pages/About";
 import Shipping from "./pages/Shipping";
 import NotFound from "./pages/NotFound";
@@ -30,7 +31,14 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/account" element={<Account />} />
-          <Route path="/admin/*" element={<Admin />} />
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/about" element={<About />} />
           <Route path="/shipping" element={<Shipping />} />
           <Route path="*" element={<NotFound />} />
