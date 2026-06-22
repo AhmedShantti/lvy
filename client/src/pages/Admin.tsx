@@ -7,6 +7,7 @@ import {
 
 import AdminOverview from "./admin/Overview";
 import AdminOrders from "./admin/Orders";
+import AdminOrderDetail from "./admin/OrderDetail";
 import AdminProducts from "./admin/Products";
 import AdminCollections from "./admin/Collections";
 import AdminCustomers from "./admin/Customers";
@@ -90,6 +91,7 @@ export default function Admin() {
         <Routes>
           <Route index element={<AdminOverview />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="orders/:id" element={<AdminOrderDetail />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="collections" element={<AdminCollections />} />
