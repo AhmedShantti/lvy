@@ -44,6 +44,9 @@ model User {
   name          String
   role          Role      @default(CUSTOMER)
   phone         String?
+  emailVerified Boolean   @default(false)
+  verifyToken   String?   @unique
+  verifyTokenExp DateTime?
   addresses     Address[]
   orders        Order[]
   reviews       Review[]

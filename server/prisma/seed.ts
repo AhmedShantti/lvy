@@ -94,6 +94,7 @@ async function main() {
       email: "admin@lvy.shop",
       name: "Admin",
       role: "ADMIN",
+      emailVerified: true,
       passwordHash: await bcrypt.hash("admin1234", 10),
     },
   });
@@ -101,6 +102,7 @@ async function main() {
     data: {
       email: "demo@lvy.shop",
       name: "Demo Customer",
+      emailVerified: true,
       passwordHash: await bcrypt.hash("demo1234", 10),
     },
   });

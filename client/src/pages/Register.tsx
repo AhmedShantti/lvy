@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle, Lock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AlertCircle, Lock, MailCheck } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAuth } from "@/store/auth";
 import { LvyLogo } from "@/components/brand/LvyLogo";
 
 const FIELDS = [
@@ -15,8 +14,8 @@ export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const setAuth = useAuth((s) => s.setAuth);
-  const nav = useNavigate();
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [resent, setResent] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,14 +23,54 @@ export default function Register() {
     setBusy(true);
     try {
       const { data } = await api.post("/auth/register", form);
-      setAuth(data.user, data.accessToken);
-      nav("/account");
+      setSentTo(data.email ?? form.email);
     } catch (e: any) {
       setError(e.response?.data?.error ?? "Registration failed");
     } finally {
       setBusy(false);
     }
   };
+
+  const resend = async () => {
+    try {
+      await api.post("/auth/resend-verification", { email: sentTo });
+      setResent(true);
+    } catch {
+      /* generic — ignore */
+    }
+  };
+
+  // After registering, show the "check your inbox" state instead of signing in.
+  if (sentTo) {
+    return (
+      <div className="container flex min-h-[80vh] items-center justify-center py-16">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-sage/15">
+            <MailCheck size={26} className="text-sage" />
+          </div>
+          <h1 className="font-display text-3xl tracking-tightest">Verify your email</h1>
+          <p className="mt-3 text-sm leading-relaxed text-stone">
+            We sent a verification link to <span className="text-charcoal">{sentTo}</span>. Click it to
+            activate your account — then you can sign in.
+          </p>
+          <p className="mt-2 text-xs text-stone">The link expires in 24 hours. Check your spam folder if you don't see it.</p>
+
+          <div className="mt-8 space-y-3">
+            <button
+              onClick={resend}
+              disabled={resent}
+              className="btn btn-outline w-full text-sm uppercase tracking-[0.15em] disabled:opacity-60"
+            >
+              {resent ? "Email resent" : "Resend verification email"}
+            </button>
+            <Link to="/login" className="btn btn-terracotta w-full text-sm uppercase tracking-[0.15em]">
+              Go to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container flex min-h-[80vh] items-center justify-center py-16">

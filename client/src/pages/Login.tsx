@@ -10,21 +10,35 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [needsVerify, setNeedsVerify] = useState(false);
+  const [resent, setResent] = useState(false);
   const setAuth = useAuth((s) => s.setAuth);
   const nav = useNavigate();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setNeedsVerify(false);
+    setResent(false);
     setBusy(true);
     try {
       const { data } = await api.post("/auth/login", { email, password });
       setAuth(data.user, data.accessToken);
       nav(data.user.role === "ADMIN" ? "/admin" : "/account");
     } catch (e: any) {
+      if (e.response?.data?.code === "EMAIL_NOT_VERIFIED") setNeedsVerify(true);
       setError(e.response?.data?.error ?? "Login failed");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const resend = async () => {
+    try {
+      await api.post("/auth/resend-verification", { email });
+      setResent(true);
+    } catch {
+      /* generic — ignore */
     }
   };
 
@@ -75,10 +89,22 @@ export default function Login() {
           </div>
 
           {error && (
-            <p className="flex items-center gap-2 rounded-md border border-terracotta/40 bg-terracotta/10 px-4 py-3 text-sm" role="alert">
-              <AlertCircle size={16} className="flex-shrink-0 text-terracotta" />
-              {error}
-            </p>
+            <div className="rounded-md border border-terracotta/40 bg-terracotta/10 px-4 py-3 text-sm" role="alert">
+              <p className="flex items-center gap-2">
+                <AlertCircle size={16} className="flex-shrink-0 text-terracotta" />
+                {error}
+              </p>
+              {needsVerify && (
+                <button
+                  type="button"
+                  onClick={resend}
+                  disabled={resent}
+                  className="mt-2 text-[11px] uppercase tracking-[0.2em] text-terracotta underline disabled:opacity-60"
+                >
+                  {resent ? "Verification email resent" : "Resend verification email"}
+                </button>
+              )}
+            </div>
           )}
 
           <button className="btn btn-terracotta w-full text-sm uppercase tracking-[0.15em] disabled:opacity-60" disabled={busy}>
