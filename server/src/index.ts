@@ -4,10 +4,28 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import swaggerUi from "swagger-ui-express";
+import { parse as parseYaml } from "yaml";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { errorHandler } from "./middleware/error.js";
 import { router } from "./routes/index.js";
 
 const app = express();
+
+// ── API docs (Swagger UI) ──
+// Loaded from server/openapi.yaml and mounted BEFORE helmet so its CSP doesn't
+// block the Swagger UI assets/inline bootstrap script.
+try {
+  const spec = parseYaml(readFileSync(resolve(process.cwd(), "openapi.yaml"), "utf8"));
+  app.get("/openapi.yaml", (_req, res) => {
+    res.type("text/yaml").send(readFileSync(resolve(process.cwd(), "openapi.yaml"), "utf8"));
+  });
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec, { customSiteTitle: "LVY API Docs" }));
+  console.log("📚 API docs at /docs");
+} catch (e) {
+  console.warn("[docs] openapi.yaml not loaded:", (e as Error).message);
+}
 
 app.use(helmet());
 app.use(cors({

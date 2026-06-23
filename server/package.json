@@ -22,6 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "stripe": "^17.0.0",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.9.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -31,12 +33,13 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.19.21",
+    "@types/swagger-ui-express": "^4.1.8",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1",
     "typescript": "^5.9.3"
   },
   "prisma": {
-  "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
-}
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  }
 }

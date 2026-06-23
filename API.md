@@ -10,12 +10,14 @@
 
 A standalone health probe lives **outside** the versioned router: `GET /health` → `{ "ok": true, "service": "lvy-api" }`.
 
+**Interactive docs:** a live Swagger UI is served at **`/docs`** (e.g. `https://lvy-p7an.onrender.com/docs`), and the raw OpenAPI spec at **`/openapi.yaml`**. The spec source is [`server/openapi.yaml`](server/openapi.yaml) — import it into Postman/Insomnia or open it in editor.swagger.io.
+
 ---
 
 ## 1. Conventions
 
 ### Authentication
-- Obtain tokens from `POST /auth/login` or `/auth/register`.
+- Obtain tokens from `POST /auth/login` or `POST /auth/verify-email` (registration requires email verification first — see §2).
 - Send the **access token** as `Authorization: Bearer <token>` on protected routes.
 - Access token TTL: `15m` (configurable via `JWT_EXPIRES_IN`). Refresh token TTL: `7d`.
 - Refresh via `POST /auth/refresh` to get a new access/refresh pair.
@@ -63,27 +65,50 @@ Central handler. JSON body always has an `error` string.
 
 ## 2. Auth — `/auth`
 
+> **Email verification is enforced.** Registration does **not** sign the user in — it
+> creates an unverified account and emails a verification link (via Resend, 24h expiry).
+> Login is blocked until the email is confirmed. Emails are normalized to lowercase.
+
+**Verification flow:** `register` → email link → `GET /verify-email?token=…` (frontend) →
+`POST /auth/verify-email` (verifies + signs in) → thereafter `login` works.
+
 ### POST `/auth/register` · Public
-Create an account and return tokens.
+Create an unverified account and send a verification email. **No tokens are returned.**
 
 **Body**
 ```json
 { "email": "jane@example.com", "password": "min8chars", "name": "Jane" }
 ```
-**201/200**
+**201**
 ```json
-{
-  "user": { "id": "c...", "email": "jane@example.com", "name": "Jane", "role": "CUSTOMER" },
-  "accessToken": "eyJ...",
-  "refreshToken": "eyJ..."
-}
+{ "verificationRequired": true, "email": "jane@example.com" }
 ```
 **Errors:** `409` email already registered · `422` validation.
 
 ### POST `/auth/login` · Public
 **Body** `{ "email": "...", "password": "..." }`
-**200** — same shape as register.
-**Errors:** `401` invalid credentials.
+**200**
+```json
+{
+  "user": { "id": "c...", "email": "...", "name": "...", "role": "CUSTOMER" },
+  "accessToken": "eyJ...",
+  "refreshToken": "eyJ..."
+}
+```
+**Errors:**
+- `401` invalid credentials
+- `403` email not verified → `{ "error": "...", "code": "EMAIL_NOT_VERIFIED" }` (clients can offer "resend")
+
+### POST `/auth/verify-email` · Public
+Consume a verification token; marks the email verified and **signs the user in**.
+**Body** `{ "token": "<hex token from the email link>" }`
+**200** — same `{ user, accessToken, refreshToken }` shape as login.
+**Errors:** `400` invalid or expired token · `422` validation.
+
+### POST `/auth/resend-verification` · Public
+Re-send the verification email (regenerates a fresh 24h token).
+**Body** `{ "email": "jane@example.com" }`
+**200** `{ "ok": true }` — always generic; never reveals whether the email exists or is already verified.
 
 ### POST `/auth/refresh` · Public
 **Body** `{ "refreshToken": "eyJ..." }`
@@ -385,10 +410,20 @@ All routes below require `Authorization: Bearer <admin token>`. Non-admins recei
 | PUT | `/admin/content/sections/:id` | `{ data?, enabled?, order? }` | |
 | POST | `/admin/content/pages/:slug/reset` | — | `home` only — restore defaults |
 
-### Media
+### Media & uploads
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/admin/media` | lists image files in `client/public` → `{ items: [{ name, url }] }` |
+| GET | `/admin/media` | lists image files in `client/public` → `{ items: [{ name, url }] }` (local dev only) |
+| POST | `/admin/upload` | upload an image to Supabase Storage → `{ url }` |
+
+**`POST /admin/upload`** — send the **raw image file as the request body** (not multipart/form-data)
+with the file's MIME type as `Content-Type`. The server streams it to a public Supabase Storage
+bucket (`SUPABASE_BUCKET`, default `lvy-media`, auto-created on first use) and returns the public URL,
+which you then save into a product's `images[]`, a category's `image`, or a collection's `cover`.
+- Constraints: image MIME types only, ≤ 20 MB.
+- Config: requires `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (else `500` "not configured").
+- **200/201** `{ "url": "https://<project>.supabase.co/storage/v1/object/public/lvy-media/<file>" }`
+- **Errors:** `400` non-image / empty · `500` storage not configured · `502` upstream upload failed.
 
 ---
 
@@ -427,11 +462,27 @@ curl -X POST http://localhost:4000/api/v1/orders \
        "deliveryTier":"STANDARD"}'
 ```
 
+**Upload an image (raw body, not multipart)**
+```bash
+curl -X POST http://localhost:4000/api/v1/admin/upload \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: image/jpeg" \
+  --data-binary @sofa.jpg
+# → { "url": "https://<project>.supabase.co/storage/v1/object/public/lvy-media/..." }
+```
+
 ---
 
 ## 13. Notes & Known Gaps
+- **Currency is EGP.** New orders are created with `currency: "EGP"` and the `Product`/`Order`
+  defaults are `EGP`. Display is relabeled, not FX-converted.
+- **Email verification is required** before login (see §2). Sending uses **Resend**
+  (`RESEND_API_KEY`, `MAIL_FROM`); `onboarding@resend.dev` only delivers to your own
+  Resend-account email until a domain is verified.
+- **Image uploads** go to **Supabase Storage** via `POST /admin/upload` (see §11). The DB
+  stays on its existing provider; only the public URL is stored.
 - **Shipping quote** ignores `ShippingZone` records (hardcoded). Wiring planned (PRD M1).
 - **Refunds** flip order status but do not yet call Stripe.
-- **Not yet implemented:** `/wishlist`, `/upload` (Cloudinary), public `/collections`, PayPal, password reset, Google OAuth, OpenAPI/Swagger docs.
+- **Not yet implemented:** `/wishlist`, public `/collections`, PayPal, password reset, Google OAuth, OpenAPI/Swagger docs.
 - **Rate limiting:** all routes share a global limiter of **200 requests / minute / IP**.
 - **CORS:** restricted to `CLIENT_URL` (comma-separated allowed), credentials enabled.
