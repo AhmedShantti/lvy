@@ -13,6 +13,9 @@ import { router } from "./routes/index.js";
 
 const app = express();
 
+// Behind Render's proxy — trust the first hop so rate limiting keys on the real client IP.
+app.set("trust proxy", 1);
+
 // ── API docs (Swagger UI) ──
 // Loaded from server/openapi.yaml and mounted BEFORE helmet so its CSP doesn't
 // block the Swagger UI assets/inline bootstrap script.
@@ -42,6 +45,18 @@ app.use("/api/v1/payments/webhook", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "1mb" }));
 
 app.use(rateLimit({ windowMs: 60_000, max: 200 }));
+
+// Stricter limiter on auth endpoints to slow brute-force / spraying.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60_000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts — please try again in a few minutes." },
+});
+app.use("/api/v1/auth/login", authLimiter);
+app.use("/api/v1/auth/register", authLimiter);
+app.use("/api/v1/auth/resend-verification", authLimiter);
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "lvy-api" }));
 

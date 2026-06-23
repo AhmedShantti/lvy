@@ -34,7 +34,8 @@ cartRouter.post("/", async (req, res, next) => {
 
 cartRouter.delete("/:id", async (req, res, next) => {
   try {
-    await prisma.cartItem.delete({ where: { id: req.params.id } });
+    // Scope by owner so a user can only delete their own cart items (prevents IDOR).
+    await prisma.cartItem.deleteMany({ where: { id: req.params.id, userId: req.user!.sub } });
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
