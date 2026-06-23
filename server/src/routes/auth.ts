@@ -67,7 +67,7 @@ authRouter.post("/login", async (req, res, next) => {
     const email = normalizeEmail(body.email);
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw new HttpError(401, "Invalid credentials");
-    const ok = await bcrypt.compare(password, user.passwordHash);
+    const ok = await bcrypt.compare(body.password, user.passwordHash);
     if (!ok) throw new HttpError(401, "Invalid credentials");
     if (!user.emailVerified) {
       return res.status(403).json({
