@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { HttpError } from "../middleware/error.js";
+import { optionalAuth } from "../middleware/auth.js";
 
 export const paymentsRouter = Router();
 
@@ -10,12 +11,17 @@ const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
-paymentsRouter.post("/intent", async (req, res, next) => {
+paymentsRouter.post("/intent", optionalAuth, async (req, res, next) => {
   try {
     if (!stripe) throw new HttpError(500, "Stripe not configured");
     const { orderNumber } = z.object({ orderNumber: z.string() }).parse(req.body);
     const order = await prisma.order.findUnique({ where: { number: orderNumber } });
     if (!order) throw new HttpError(404, "Order not found");
+    // Account-linked orders require their owner; guest orders rely on the unguessable number.
+    if (order.userId && order.userId !== req.user?.sub) throw new HttpError(403, "Forbidden");
+    // Don't create intents for orders that are already settled.
+    if (order.paymentStatus === "PAID") throw new HttpError(400, "Order is already paid");
+    if (order.paymentStatus === "REFUNDED") throw new HttpError(400, "Order was refunded");
 
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(Number(order.total) * 100),

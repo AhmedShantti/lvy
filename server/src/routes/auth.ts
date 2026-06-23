@@ -33,8 +33,11 @@ async function dispatchVerification(email: string, name: string, token: string) 
     // Don't fail the request if the mail provider hiccups — the user can resend.
     console.error("[auth] verification email failed:", e);
   }
-  // Always log the link so verification is possible in dev / when email is unconfigured.
-  console.log(`[auth] verification link for ${email}: ${link}`);
+  // Log the link only outside production so verification is possible in dev /
+  // when email is unconfigured — never write tokens to production logs.
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[auth] verification link for ${email}: ${link}`);
+  }
 }
 
 const registerSchema = z.object({

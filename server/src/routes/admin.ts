@@ -870,6 +870,20 @@ adminRouter.put("/settings/:key", async (req, res, next) => {
 });
 
 // ═════ Image uploads → Supabase Storage ═════
+// Verify the bytes actually are a raster image (don't trust the Content-Type header).
+// Also blocks SVG, which can carry embedded scripts.
+function looksLikeImage(buf: Buffer): boolean {
+  if (buf.length < 12) return false;
+  const b = buf;
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return true;            // PNG
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return true;                              // JPEG
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return true;            // GIF
+  if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return true;          // WEBP (RIFF…WEBP)
+  if (b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) return true;            // ftyp… (AVIF/HEIF)
+  return false;
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL?.replace(/\/$/, "");
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET ?? "lvy-media";
@@ -895,6 +909,7 @@ adminRouter.post("/upload", express.raw({ type: () => true, limit: "20mb" }), as
     if (!contentType.startsWith("image/")) throw new HttpError(400, "Only image files are allowed");
     const buffer = req.body as Buffer;
     if (!Buffer.isBuffer(buffer) || buffer.length === 0) throw new HttpError(400, "Empty file");
+    if (!looksLikeImage(buffer)) throw new HttpError(400, "File does not appear to be a valid image (PNG, JPEG, GIF, WEBP, or AVIF)");
 
     await ensureBucket();
 
