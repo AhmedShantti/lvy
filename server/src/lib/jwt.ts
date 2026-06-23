@@ -10,10 +10,10 @@ export interface JwtPayload {
 }
 
 export function signAccess(p: JwtPayload) {
-  return jwt.sign(p, ACCESS, { expiresIn: (process.env.JWT_EXPIRES_IN ?? "15m") as SignOptions['expiresIn'] });
+  return jwt.sign(p, ACCESS, { expiresIn: (process.env.JWT_EXPIRES_IN ?? "2h") as SignOptions['expiresIn'] });
 }
 export function signRefresh(p: JwtPayload) {
-  return jwt.sign(p, REFRESH, { expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ?? "7d") as SignOptions['expiresIn'] });
+  return jwt.sign(p, REFRESH, { expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN ?? "30d") as SignOptions['expiresIn'] });
 }
 export function verifyAccess(token: string) {
   return jwt.verify(token, ACCESS) as JwtPayload;

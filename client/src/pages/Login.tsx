@@ -23,7 +23,7 @@ export default function Login() {
     setBusy(true);
     try {
       const { data } = await api.post("/auth/login", { email, password });
-      setAuth(data.user, data.accessToken);
+      setAuth(data.user, data.accessToken, data.refreshToken);
       nav(data.user.role === "ADMIN" ? "/admin" : "/account");
     } catch (e: any) {
       if (e.response?.data?.code === "EMAIL_NOT_VERIFIED") setNeedsVerify(true);

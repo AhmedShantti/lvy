@@ -28,7 +28,7 @@ export default function VerifyEmail() {
     (async () => {
       try {
         const { data } = await api.post("/auth/verify-email", { token });
-        setAuth(data.user, data.accessToken);
+        setAuth(data.user, data.accessToken, data.refreshToken);
         setStatus("success");
         // Brief confirmation, then send them on their way (signed in).
         setTimeout(() => nav(data.user.role === "ADMIN" ? "/admin" : "/account"), 1500);
