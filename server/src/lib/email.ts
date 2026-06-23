@@ -60,3 +60,38 @@ export async function sendVerificationEmail(to: string, name: string, url: strin
     html: verificationEmailHtml(name, url),
   });
 }
+
+function passwordResetEmailHtml(name: string, url: string) {
+  return `
+  <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background:#F6F1EA; padding:40px 0;">
+    <div style="max-width:480px; margin:0 auto; background:#fff; border:1px solid #e7e0d6;">
+      <div style="background:#1C1B19; padding:28px 32px;">
+        <p style="margin:0; color:#F6F1EA; font-size:24px; letter-spacing:2px;">lvy</p>
+      </div>
+      <div style="padding:32px;">
+        <h1 style="margin:0 0 12px; font-size:22px; color:#1C1B19;">Reset your password</h1>
+        <p style="margin:0 0 20px; color:#5b5650; font-size:15px; line-height:1.6;">
+          Hi ${name || "there"}, we received a request to reset your LVY password. Click below to choose a new one.
+        </p>
+        <a href="${url}" style="display:inline-block; background:#83382E; color:#fff; text-decoration:none; padding:14px 28px; font-size:14px; letter-spacing:1px; text-transform:uppercase;">
+          Reset password
+        </a>
+        <p style="margin:24px 0 0; color:#8B847C; font-size:13px; line-height:1.6;">
+          This link expires in 1 hour. If the button doesn't work, paste this URL into your browser:<br />
+          <a href="${url}" style="color:#83382E; word-break:break-all;">${url}</a>
+        </p>
+        <p style="margin:20px 0 0; color:#b3aca3; font-size:12px;">
+          If you didn't request this, you can safely ignore this email — your password won't change.
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
+
+export async function sendPasswordResetEmail(to: string, name: string, url: string) {
+  return sendEmail({
+    to,
+    subject: "Reset your LVY password",
+    html: passwordResetEmailHtml(name, url),
+  });
+}

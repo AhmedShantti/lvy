@@ -6,7 +6,7 @@ import { prisma } from "../lib/prisma.js";
 import { signAccess, signRefresh, verifyRefresh } from "../lib/jwt.js";
 import { HttpError } from "../middleware/error.js";
 import { requireAuth } from "../middleware/auth.js";
-import { sendVerificationEmail } from "../lib/email.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../lib/email.js";
 
 export const authRouter = Router();
 
@@ -136,8 +136,87 @@ authRouter.get("/me", requireAuth, async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.sub },
-      select: { id: true, email: true, name: true, role: true, phone: true, addresses: true },
+      select: { id: true, email: true, name: true, role: true, phone: true, createdAt: true, addresses: true },
     });
     res.json({ user });
+  } catch (e) { next(e); }
+});
+
+// ═════ Profile update (name / phone) ═════
+authRouter.patch("/me", requireAuth, async (req, res, next) => {
+  try {
+    const data = z.object({
+      name: z.string().min(2).optional(),
+      phone: z.string().max(40).optional(),
+    }).parse(req.body);
+    const user = await prisma.user.update({
+      where: { id: req.user!.sub },
+      data,
+      select: { id: true, email: true, name: true, role: true, phone: true, createdAt: true },
+    });
+    res.json({ user });
+  } catch (e) { next(e); }
+});
+
+// ═════ Change password (authenticated) ═════
+authRouter.post("/change-password", requireAuth, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = z.object({
+      currentPassword: z.string(),
+      newPassword: z.string().min(8),
+    }).parse(req.body);
+    const user = await prisma.user.findUnique({ where: { id: req.user!.sub } });
+    if (!user) throw new HttpError(404, "User not found");
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!ok) throw new HttpError(400, "Current password is incorrect");
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash } });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ═════ Forgot password (request a reset link) ═════
+authRouter.post("/forgot-password", async (req, res, next) => {
+  try {
+    const body = z.object({ email: z.string().email() }).parse(req.body);
+    const email = normalizeEmail(body.email);
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      const resetToken = randomBytes(32).toString("hex");
+      const resetTokenExp = new Date(Date.now() + 60 * 60 * 1000); // 1h
+      await prisma.user.update({ where: { id: user.id }, data: { resetToken, resetTokenExp } });
+      const link = `${clientUrl()}/reset-password?token=${resetToken}`;
+      try {
+        await sendPasswordResetEmail(user.email, user.name, link);
+      } catch (e) {
+        console.error("[auth] reset email failed:", e);
+      }
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[auth] password reset link for ${email}: ${link}`);
+      }
+    }
+    // Generic response — never reveal whether the email exists.
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ═════ Reset password (consume the token) ═════
+authRouter.post("/reset-password", async (req, res, next) => {
+  try {
+    const { token, password } = z.object({
+      token: z.string().min(1),
+      password: z.string().min(8),
+    }).parse(req.body);
+    const user = await prisma.user.findUnique({ where: { resetToken: token } });
+    if (!user || !user.resetTokenExp || user.resetTokenExp < new Date()) {
+      throw new HttpError(400, "This reset link is invalid or has expired. Please request a new one.");
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      // Resetting the password also confirms control of the inbox → mark verified.
+      data: { passwordHash, resetToken: null, resetTokenExp: null, emailVerified: true },
+    });
+    res.json({ ok: true });
   } catch (e) { next(e); }
 });

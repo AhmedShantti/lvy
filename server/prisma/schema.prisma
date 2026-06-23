@@ -47,6 +47,8 @@ model User {
   emailVerified Boolean   @default(false)
   verifyToken   String?   @unique
   verifyTokenExp DateTime?
+  resetToken    String?   @unique
+  resetTokenExp DateTime?
   addresses     Address[]
   orders        Order[]
   reviews       Review[]

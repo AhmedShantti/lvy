@@ -1,14 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Package, Heart, MapPin, Settings, LogOut, ChevronRight,
   ArrowUpRight, Mail, ShieldCheck, User as UserIcon,
+  Plus, Edit2, Trash2, Star,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/store/auth";
 import { useWishlist } from "@/store/wishlist";
+import { toast, errMessage } from "@/store/toast";
 
 type Tab = "overview" | "orders" | "wishlist" | "profile";
 
@@ -316,44 +318,7 @@ export default function Account() {
             </div>
           )}
 
-          {tab === "profile" && (
-            <div className="grid lg:grid-cols-3 gap-10 max-w-5xl">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="border border-charcoal/10 p-8">
-                  <p className="text-[10px] uppercase tracking-[0.4em] text-terracotta mb-6">Personal information</p>
-                  <div className="grid md:grid-cols-2 gap-5">
-                    <ReadOnlyField label="Full name" value={user.name} />
-                    <ReadOnlyField label="Email" value={user.email} />
-                    <ReadOnlyField label="Account type" value={user.role === "ADMIN" ? "Administrator" : "Customer"} />
-                    <ReadOnlyField label="Member since" value="—" />
-                  </div>
-                  <p className="text-xs text-muted mt-6">
-                    Contact <a href="mailto:support@lvy.shop" className="underline">support@lvy.shop</a> to update your details.
-                  </p>
-                </div>
-
-                <div className="border border-charcoal/10 p-8">
-                  <p className="text-[10px] uppercase tracking-[0.4em] text-terracotta mb-4">Security</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Password</p>
-                      <p className="text-sm text-muted">Last updated — not tracked</p>
-                    </div>
-                    <button className="btn btn-outline" disabled>Change password</button>
-                  </div>
-                </div>
-              </div>
-
-              <aside>
-                <div className="border border-charcoal/10 p-6 bg-sand/30">
-                  <MapPin size={18} className="text-terracotta mb-3" />
-                  <p className="font-display text-xl mb-1">Saved addresses</p>
-                  <p className="text-sm text-muted mb-4">Addresses you've used at checkout will appear here.</p>
-                  <p className="text-xs text-muted italic">Coming soon</p>
-                </div>
-              </aside>
-            </div>
-          )}
+          {tab === "profile" && <ProfileTab />}
         </motion.div>
       </AnimatePresence>
     </motion.div>
@@ -431,6 +396,202 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
     <div>
       <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">{label}</label>
       <p className="border-b border-charcoal/10 pb-2">{value}</p>
+    </div>
+  );
+}
+
+const inputCls = "w-full border-b border-charcoal/20 bg-transparent py-2 outline-none focus:border-charcoal transition";
+const fieldLabelCls = "text-[10px] uppercase tracking-[0.25em] text-muted block mb-2";
+
+function ProfileTab() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  const { data: meData } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => (await api.get("/auth/me")).data,
+  });
+  const me = meData?.user;
+
+  const { data: addrData } = useQuery({
+    queryKey: ["addresses"],
+    queryFn: async () => (await api.get("/addresses")).data,
+  });
+  const addresses: any[] = addrData?.items ?? [];
+
+  // ── Personal info ──
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  useEffect(() => {
+    if (me) { setName(me.name ?? ""); setPhone(me.phone ?? ""); }
+  }, [me]);
+
+  const saveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const { data } = await api.patch("/auth/me", { name, phone: phone || undefined });
+      useAuth.setState((s) => ({ user: s.user ? { ...s.user, name: data.user.name } : s.user }));
+      qc.invalidateQueries({ queryKey: ["me"] });
+      toast.success("Profile updated");
+    } catch (e) { toast.error(errMessage(e)); }
+    finally { setSavingProfile(false); }
+  };
+
+  // ── Change password ──
+  const [cur, setCur] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [savingPw, setSavingPw] = useState(false);
+
+  const changePassword = async () => {
+    if (next.length < 8) return toast.error("New password must be at least 8 characters");
+    if (next !== confirm) return toast.error("Passwords don't match");
+    setSavingPw(true);
+    try {
+      await api.post("/auth/change-password", { currentPassword: cur, newPassword: next });
+      setCur(""); setNext(""); setConfirm("");
+      toast.success("Password changed");
+    } catch (e) { toast.error(errMessage(e)); }
+    finally { setSavingPw(false); }
+  };
+
+  // ── Addresses ──
+  const [editing, setEditing] = useState<any | null>(null);
+
+  const saveAddress = async () => {
+    if (!editing) return;
+    try {
+      if (editing.id) await api.put(`/addresses/${editing.id}`, editing);
+      else await api.post("/addresses", editing);
+      qc.invalidateQueries({ queryKey: ["addresses"] });
+      setEditing(null);
+      toast.success("Address saved");
+    } catch (e) { toast.error(errMessage(e)); }
+  };
+
+  const removeAddress = async (id: string) => {
+    if (!window.confirm("Delete this address?")) return;
+    try {
+      await api.delete(`/addresses/${id}`);
+      qc.invalidateQueries({ queryKey: ["addresses"] });
+      toast.success("Address deleted");
+    } catch (e) { toast.error(errMessage(e)); }
+  };
+
+  const emptyAddress = { fullName: me?.name ?? "", line1: "", line2: "", city: "", region: "", postal: "", country: "", phone: me?.phone ?? "", isDefault: false };
+
+  return (
+    <div className="grid lg:grid-cols-3 gap-10 max-w-5xl">
+      <div className="lg:col-span-2 space-y-6">
+        {/* Personal information */}
+        <div className="border border-charcoal/10 p-8">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-terracotta mb-6">Personal information</p>
+          <div className="grid md:grid-cols-2 gap-5">
+            <div>
+              <label className={fieldLabelCls}>Full name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={fieldLabelCls}>Phone</label>
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputCls} placeholder="—" />
+            </div>
+            <ReadOnlyField label="Email" value={me?.email ?? user?.email ?? "—"} />
+            <ReadOnlyField label="Member since" value={me?.createdAt ? fmtDate(me.createdAt) : "—"} />
+          </div>
+          <button onClick={saveProfile} disabled={savingProfile} className="btn btn-primary mt-6 disabled:opacity-60">
+            {savingProfile ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+
+        {/* Security */}
+        <div className="border border-charcoal/10 p-8">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-terracotta mb-6">Change password</p>
+          <div className="space-y-5 max-w-sm">
+            <div>
+              <label className={fieldLabelCls}>Current password</label>
+              <input type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={fieldLabelCls}>New password</label>
+              <input type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} className={inputCls} />
+            </div>
+            <div>
+              <label className={fieldLabelCls}>Confirm new password</label>
+              <input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={inputCls} />
+            </div>
+            <button onClick={changePassword} disabled={savingPw || !cur || !next} className="btn btn-outline disabled:opacity-50">
+              {savingPw ? "Updating…" : "Update password"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Addresses */}
+      <aside>
+        <div className="border border-charcoal/10 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-terracotta flex items-center gap-2"><MapPin size={13} /> Addresses</p>
+            <button onClick={() => setEditing({ ...emptyAddress })} className="text-xs uppercase tracking-wider border-b border-charcoal pb-0.5 flex items-center gap-1">
+              <Plus size={12} /> Add
+            </button>
+          </div>
+
+          {addresses.length === 0 ? (
+            <p className="text-sm text-muted">No saved addresses yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {addresses.map((a) => (
+                <div key={a.id} className="border border-charcoal/10 p-4 text-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium flex items-center gap-1.5">
+                      {a.fullName}
+                      {a.isDefault && <Star size={11} className="fill-terracotta text-terracotta" />}
+                    </p>
+                    <div className="flex gap-1">
+                      <button onClick={() => setEditing({ ...a, line2: a.line2 ?? "" })} className="p-1.5 hover:bg-charcoal/5"><Edit2 size={12} /></button>
+                      <button onClick={() => removeAddress(a.id)} className="p-1.5 hover:bg-terracotta/10 text-terracotta"><Trash2 size={12} /></button>
+                    </div>
+                  </div>
+                  <p className="text-muted mt-1">{a.line1}{a.line2 ? `, ${a.line2}` : ""}</p>
+                  <p className="text-muted">{a.city}, {a.region} {a.postal}</p>
+                  <p className="text-muted">{a.country} · {a.phone}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/50 backdrop-blur-sm p-4" onClick={() => setEditing(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-cream max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-charcoal/10">
+              <h2 className="font-display text-2xl">{editing.id ? "Edit address" : "New address"}</h2>
+              <button onClick={() => setEditing(null)} className="text-muted hover:text-charcoal text-2xl leading-none">×</button>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-4">
+              {([
+                ["fullName", "Full name", 2], ["line1", "Address line 1", 2], ["line2", "Apartment, suite (optional)", 2],
+                ["city", "City", 1], ["region", "State / Region", 1], ["postal", "Postal code", 1], ["country", "Country", 1], ["phone", "Phone", 2],
+              ] as [string, string, number][]).map(([k, label, span]) => (
+                <div key={k} className={span === 2 ? "col-span-2" : ""}>
+                  <label className={fieldLabelCls}>{label}</label>
+                  <input value={editing[k] ?? ""} onChange={(e) => setEditing({ ...editing, [k]: e.target.value })} className={inputCls} />
+                </div>
+              ))}
+              <label className="col-span-2 flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={!!editing.isDefault} onChange={(e) => setEditing({ ...editing, isDefault: e.target.checked })} />
+                Set as default address
+              </label>
+              <div className="col-span-2 flex gap-3 mt-2">
+                <button onClick={() => setEditing(null)} className="btn btn-outline flex-1">Cancel</button>
+                <button onClick={saveAddress} className="btn btn-primary flex-1">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

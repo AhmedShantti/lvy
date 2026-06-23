@@ -70,12 +70,12 @@ export default function Login() {
           <div>
             <div className="mb-2 flex items-baseline justify-between">
               <label htmlFor="password" className="field-label mb-0">Password</label>
-              <a
-                href="mailto:support@lvy.shop?subject=Password%20help"
+              <Link
+                to="/forgot-password"
                 className="text-[11px] uppercase tracking-[0.2em] text-stone transition hover:text-terracotta"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
             <input
               id="password"
