@@ -9,8 +9,8 @@ function PriceTag({ price, compareAt }: { price: number; compareAt?: number | nu
   const onSale = compareAt && compareAt > price;
   return (
     <div className="flex items-baseline gap-2">
-      <p className="font-display text-lg tabular-nums">${Number(price).toFixed(0)}</p>
-      {onSale && <p className="text-xs text-muted line-through tabular-nums">${Number(compareAt).toFixed(0)}</p>}
+      <p className="font-display text-lg tabular-nums">EGP {Number(price).toFixed(0)}</p>
+      {onSale && <p className="text-xs text-muted line-through tabular-nums">EGP {Number(compareAt).toFixed(0)}</p>}
     </div>
   );
 }
@@ -56,9 +56,9 @@ function FeaturedCard({ p, size = "md" }: { p: any; size?: "xl" | "md" | "sm" })
           <div className="flex items-end justify-between gap-4">
             <h3 className={`${titleClass} leading-tight`}>{p.name}</h3>
             <div className="flex items-baseline gap-2 flex-shrink-0">
-              <p className="font-display text-lg tabular-nums">${Number(p.price).toFixed(0)}</p>
+              <p className="font-display text-lg tabular-nums">EGP {Number(p.price).toFixed(0)}</p>
               {p.compareAt && p.compareAt > p.price && (
-                <p className="text-xs text-cream/60 line-through tabular-nums">${Number(p.compareAt).toFixed(0)}</p>
+                <p className="text-xs text-cream/60 line-through tabular-nums">EGP {Number(p.compareAt).toFixed(0)}</p>
               )}
             </div>
           </div>

@@ -39,9 +39,9 @@ export default function ProductCard({ product }: { product: any }) {
           )}
         </div>
         <div className="flex flex-shrink-0 items-baseline gap-2">
-          <p className="font-display text-lg tabular-nums text-terracotta">${price.toLocaleString()}</p>
+          <p className="font-display text-lg tabular-nums text-terracotta">EGP {price.toLocaleString()}</p>
           {onSale && (
-            <p className="text-xs tabular-nums text-stone line-through">${compareAt!.toLocaleString()}</p>
+            <p className="text-xs tabular-nums text-stone line-through">EGP {compareAt!.toLocaleString()}</p>
           )}
         </div>
       </div>

@@ -18,10 +18,10 @@ const GROUPS = [
     title: "Pricing & tax",
     fields: [
       { key: "taxRate", label: "Tax rate (decimal, e.g. 0.08 = 8%)", type: "number" },
-      { key: "freeShippingThreshold", label: "Free shipping over ($)", type: "number" },
-      { key: "standardShipping", label: "Standard shipping ($)", type: "number" },
-      { key: "expressShipping", label: "Express shipping ($)", type: "number" },
-      { key: "whiteGloveShipping", label: "White glove shipping ($)", type: "number" },
+      { key: "freeShippingThreshold", label: "Free shipping over (EGP)", type: "number" },
+      { key: "standardShipping", label: "Standard shipping (EGP)", type: "number" },
+      { key: "expressShipping", label: "Express shipping (EGP)", type: "number" },
+      { key: "whiteGloveShipping", label: "White glove shipping (EGP)", type: "number" },
     ],
   },
   {

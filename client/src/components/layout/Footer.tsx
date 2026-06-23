@@ -231,7 +231,7 @@ export default function Footer() {
       <div className="container flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-8 border-t border-cream/10">
         <div className="flex items-center gap-8 text-[10px] uppercase tracking-[0.3em] text-cream/50">
           <span>© {new Date().getFullYear()} LVY</span>
-          <button className="hover:text-cream transition">EN · USD</button>
+          <button className="hover:text-cream transition">EN · EGP</button>
           <Link to="#" className="hover:text-cream transition hidden sm:inline">Privacy</Link>
           <Link to="#" className="hover:text-cream transition hidden sm:inline">Terms</Link>
           <Link to="#" className="hover:text-cream transition hidden md:inline">Cookies</Link>

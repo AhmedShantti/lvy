@@ -19,7 +19,7 @@ const TABS: { id: Tab; label: string; icon: any }[] = [
   { id: "profile", label: "Profile", icon: Settings },
 ];
 
-function fmtMoney(n: number) { return `$${Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
+function fmtMoney(n: number) { return `EGP ${Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
 function fmtDate(d: string | Date) { return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }); }
 
 const STATUS_COLOR: Record<string, string> = {
@@ -307,7 +307,7 @@ export default function Account() {
                           <p className="font-display text-base">{p.name}</p>
                           <p className="text-[10px] uppercase tracking-wider text-muted">{p.material}</p>
                         </div>
-                        <p className="font-display text-base tabular-nums">${Number(p.price).toFixed(0)}</p>
+                        <p className="font-display text-base tabular-nums">EGP {Number(p.price).toFixed(0)}</p>
                       </div>
                     </motion.div>
                   ))}

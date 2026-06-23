@@ -71,6 +71,7 @@ ordersRouter.post("/", optionalAuth, async (req, res, next) => {
         number: genNumber(),
         email: data.email,
         userId: req.user?.sub,
+        currency: "EGP",
         subtotal, shipping, tax, discount, total,
         deliveryTier: data.deliveryTier,
         couponCode: data.couponCode,

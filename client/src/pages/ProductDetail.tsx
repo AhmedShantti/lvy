@@ -321,7 +321,7 @@ export default function ProductDetail() {
           )}
 
           <div className="flex items-baseline gap-3 mb-2">
-            <p className="font-display text-4xl tabular-nums">${Number(p.price).toLocaleString()}</p>
+            <p className="font-display text-4xl tabular-nums">EGP {Number(p.price).toLocaleString()}</p>
             {onSale && (
               <p className="text-xl text-muted line-through tabular-nums">
                 ${Number(p.compareAt).toLocaleString()}
@@ -404,7 +404,7 @@ export default function ProductDetail() {
               disabled={outOfStock}
               className="btn btn-terracotta flex-1 text-sm uppercase tracking-[0.15em] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {outOfStock ? "Sold Out" : `Add to Bag — $${Number(p.price).toLocaleString()}`}
+              {outOfStock ? "Sold Out" : `Add to Bag — EGP ${Number(p.price).toLocaleString()}`}
             </button>
             <button
               onClick={handleWishlist}
@@ -686,8 +686,8 @@ export default function ProductDetail() {
         <div className="flex-shrink-0">
           <p className="text-[10px] uppercase tracking-widest text-muted truncate max-w-[100px]">{p.name}</p>
           <div className="flex items-baseline gap-2">
-            <p className="font-display text-lg tabular-nums">${Number(p.price).toLocaleString()}</p>
-            {onSale && <p className="text-xs text-muted line-through tabular-nums">${Number(p.compareAt).toLocaleString()}</p>}
+            <p className="font-display text-lg tabular-nums">EGP {Number(p.price).toLocaleString()}</p>
+            {onSale && <p className="text-xs text-muted line-through tabular-nums">EGP {Number(p.compareAt).toLocaleString()}</p>}
           </div>
         </div>
         <button

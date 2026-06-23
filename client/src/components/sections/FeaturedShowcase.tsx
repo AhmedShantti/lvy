@@ -79,7 +79,7 @@ export default function FeaturedShowcase({ data: content }: { data?: any }) {
                         <h3 className="font-display text-xl leading-tight">{p.name}</h3>
                         <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-stone">{p.material}</p>
                       </div>
-                      <p className="font-display text-lg tabular-nums text-terracotta">${Number(p.price).toFixed(0)}</p>
+                      <p className="font-display text-lg tabular-nums text-terracotta">EGP {Number(p.price).toFixed(0)}</p>
                     </div>
                   </Link>
                 </motion.div>
@@ -133,9 +133,9 @@ function HeroFeature({ product: p, eyebrow }: { product: any; eyebrow: string })
             </h2>
 
             <div className="mt-5 flex items-baseline gap-4">
-              <p className="font-display text-3xl tabular-nums text-terracotta">${Number(p.price).toLocaleString()}</p>
+              <p className="font-display text-3xl tabular-nums text-terracotta">EGP {Number(p.price).toLocaleString()}</p>
               {p.compareAt && Number(p.compareAt) > Number(p.price) && (
-                <p className="text-lg tabular-nums text-cream/30 line-through">${Number(p.compareAt).toLocaleString()}</p>
+                <p className="text-lg tabular-nums text-cream/30 line-through">EGP {Number(p.compareAt).toLocaleString()}</p>
               )}
             </div>
 
@@ -227,7 +227,7 @@ function EditorialCard({ product: p, index, reverse }: { product: any; index: nu
               {p.name}
             </h3>
 
-            <p className="mt-3 font-display text-2xl tabular-nums text-terracotta">${Number(p.price).toLocaleString()}</p>
+            <p className="mt-3 font-display text-2xl tabular-nums text-terracotta">EGP {Number(p.price).toLocaleString()}</p>
 
             <div aria-hidden className="my-6 h-px w-10 bg-charcoal/15" />
 

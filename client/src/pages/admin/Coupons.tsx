@@ -100,9 +100,9 @@ export default function AdminCoupons() {
                 <tr key={c.id} className="border-t border-charcoal/5 hover:bg-sand/30 transition">
                   <td className="p-4 font-display text-lg tabular-nums">{c.code}</td>
                   <td className="p-4">
-                    {c.type === "percent" ? `${c.value}%` : `$${c.value}`}
+                    {c.type === "percent" ? `${c.value}%` : `EGP ${c.value}`}
                   </td>
-                  <td className="p-4 text-muted">{c.minTotal ? `$${c.minTotal}` : "—"}</td>
+                  <td className="p-4 text-muted">{c.minTotal ? `EGP ${c.minTotal}` : "—"}</td>
                   <td className="p-4 text-muted">{c.expiresAt ? fmtDate(c.expiresAt) : "Never"}</td>
                   <td className="p-4">
                     <button
@@ -159,7 +159,7 @@ export default function AdminCoupons() {
                 className="w-full border-b border-charcoal/20 bg-transparent py-2 outline-none"
               >
                 <option value="percent">Percent (%)</option>
-                <option value="fixed">Fixed ($)</option>
+                <option value="fixed">Fixed (EGP)</option>
               </select>
             </div>
             <div>
@@ -172,7 +172,7 @@ export default function AdminCoupons() {
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Minimum total ($)</label>
+              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Minimum total (EGP)</label>
               <input
                 type="number"
                 value={editing.minTotal ?? ""}

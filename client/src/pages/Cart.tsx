@@ -44,9 +44,9 @@ export default function Cart() {
                     {i.variant && (
                       <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-stone">{i.variant}</p>
                     )}
-                    <p className="mt-1 text-sm text-stone tabular-nums">${i.price.toFixed(2)} each</p>
+                    <p className="mt-1 text-sm text-stone tabular-nums">EGP {i.price.toFixed(2)} each</p>
                   </div>
-                  <p className="font-display text-lg tabular-nums">${(i.price * i.quantity).toFixed(2)}</p>
+                  <p className="font-display text-lg tabular-nums">EGP {(i.price * i.quantity).toFixed(2)}</p>
                 </div>
 
                 <div className="mt-auto flex items-center justify-between pt-4">
@@ -94,7 +94,7 @@ export default function Cart() {
             <dl className="mt-6 space-y-3 border-b border-charcoal/15 pb-5 text-sm">
               <div className="flex justify-between">
                 <dt className="text-stone">Subtotal</dt>
-                <dd className="tabular-nums">${total.toFixed(2)}</dd>
+                <dd className="tabular-nums">EGP {total.toFixed(2)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-stone">Shipping</dt>
@@ -108,7 +108,7 @@ export default function Cart() {
 
             <div className="mb-6 mt-5 flex items-baseline justify-between">
               <span className="text-[11px] uppercase tracking-[0.25em] text-stone">Total</span>
-              <span className="font-display text-3xl tabular-nums">${total.toFixed(2)}</span>
+              <span className="font-display text-3xl tabular-nums">EGP {total.toFixed(2)}</span>
             </div>
 
             <Link
@@ -129,7 +129,7 @@ export default function Cart() {
       <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center gap-4 border-t border-charcoal/10 bg-cream/95 px-4 py-3 shadow-md backdrop-blur-md lg:hidden">
         <div className="flex-shrink-0">
           <p className="text-[10px] uppercase tracking-[0.2em] text-stone">Total</p>
-          <p className="font-display text-xl tabular-nums leading-none">${total.toFixed(2)}</p>
+          <p className="font-display text-xl tabular-nums leading-none">EGP {total.toFixed(2)}</p>
         </div>
         <Link to="/checkout" className="btn btn-terracotta flex-1 text-sm uppercase tracking-[0.15em]">
           Checkout <ArrowRight size={16} />

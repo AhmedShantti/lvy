@@ -80,5 +80,5 @@ export function fmtDate(d: string | Date) {
 }
 
 export function fmtMoney(n: number | string | null | undefined) {
-  return `$${Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `EGP ${Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

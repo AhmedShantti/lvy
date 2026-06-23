@@ -129,15 +129,15 @@ export default function AdminShippingZones() {
               <input value={editing.postalPrefix} onChange={(e) => setEditing({ ...editing, postalPrefix: e.target.value })} placeholder="e.g. 10 or 9" className="w-full border-b border-charcoal/20 bg-transparent py-2 outline-none focus:border-charcoal" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Standard ($)</label>
+              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Standard (EGP)</label>
               <input type="number" step="any" value={editing.standard} onChange={(e) => setEditing({ ...editing, standard: Number(e.target.value) })} className="w-full border-b border-charcoal/20 bg-transparent py-2 outline-none focus:border-charcoal" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Express ($)</label>
+              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Express (EGP)</label>
               <input type="number" step="any" value={editing.express} onChange={(e) => setEditing({ ...editing, express: Number(e.target.value) })} className="w-full border-b border-charcoal/20 bg-transparent py-2 outline-none focus:border-charcoal" />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">White glove ($)</label>
+              <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">White glove (EGP)</label>
               <input type="number" step="any" value={editing.whiteGlove} onChange={(e) => setEditing({ ...editing, whiteGlove: Number(e.target.value) })} className="w-full border-b border-charcoal/20 bg-transparent py-2 outline-none focus:border-charcoal" />
             </div>
             <div className="col-span-2 flex gap-3 mt-4">

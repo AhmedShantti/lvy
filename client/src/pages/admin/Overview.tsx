@@ -101,7 +101,7 @@ export default function AdminOverview() {
                   tickLine={false}
                 />
                 <YAxis
-                  tickFormatter={(v) => `$${v}`}
+                  tickFormatter={(v) => `EGP ${v}`}
                   tick={{ fontSize: 10, fill: "#6b4a2f" }}
                   axisLine={false}
                   tickLine={false}

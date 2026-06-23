@@ -19,7 +19,7 @@ export default function Hero({ data }: { data?: any }) {
   const body = data?.body ?? "Handcrafted macramé that brings softness and balance into modern spaces — where design is not loud, but deeply felt. Made by hand, in small batches, from natural fibres.";
   const ctaPrimary = data?.ctaPrimary ?? { label: "Shop the Collection", to: "/shop" };
   const ctaSecondary = data?.ctaSecondary ?? { label: "Our Story", to: "/about" };
-  const featured = data?.featured ?? { label: "Luna Wall Hanging", price: "$180" };
+  const featured = data?.featured ?? { label: "Luna Wall Hanging", price: "EGP 180" };
 
   const [heroIndex] = useState(() => Math.floor(Math.random() * images.length));
   const heroImage = images[heroIndex];

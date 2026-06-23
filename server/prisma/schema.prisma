@@ -94,7 +94,7 @@ model Product {
   description  String
   price        Decimal          @db.Decimal(10, 2)
   compareAt    Decimal?         @db.Decimal(10, 2)
-  currency     String           @default("USD")
+  currency     String           @default("EGP")
   images       String[]
   material     String?
   color        String?
@@ -166,7 +166,7 @@ model Order {
   tax           Decimal       @db.Decimal(10, 2)
   discount      Decimal       @default(0) @db.Decimal(10, 2)
   total         Decimal       @db.Decimal(10, 2)
-  currency      String        @default("USD")
+  currency      String        @default("EGP")
   deliveryTier  DeliveryTier  @default(STANDARD)
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(PENDING)

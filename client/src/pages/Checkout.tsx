@@ -190,7 +190,7 @@ export default function Checkout() {
                       <p className="text-sm text-stone">{t.desc}</p>
                     </div>
                   </div>
-                  <span className="font-display text-lg tabular-nums">{t.price === 0 ? "Free" : `$${t.price}`}</span>
+                  <span className="font-display text-lg tabular-nums">{t.price === 0 ? "Free" : `EGP ${t.price}`}</span>
                 </label>
               ))}
             </div>
@@ -231,20 +231,20 @@ export default function Checkout() {
                     </span>
                   </div>
                   <p className="line-clamp-2 flex-1 leading-snug">{i.name}</p>
-                  <span className="tabular-nums">${(i.price * i.quantity).toFixed(2)}</span>
+                  <span className="tabular-nums">EGP {(i.price * i.quantity).toFixed(2)}</span>
                 </li>
               ))}
             </ul>
 
             <dl className="space-y-2 border-t border-charcoal/12 pt-4 text-sm">
-              <div className="flex justify-between"><dt className="text-stone">Subtotal</dt><dd className="tabular-nums">${subtotal().toFixed(2)}</dd></div>
-              <div className="flex justify-between"><dt className="text-stone">Shipping</dt><dd className="tabular-nums">{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</dd></div>
-              <div className="flex justify-between"><dt className="text-stone">Tax</dt><dd className="tabular-nums">${tax.toFixed(2)}</dd></div>
+              <div className="flex justify-between"><dt className="text-stone">Subtotal</dt><dd className="tabular-nums">EGP {subtotal().toFixed(2)}</dd></div>
+              <div className="flex justify-between"><dt className="text-stone">Shipping</dt><dd className="tabular-nums">{shipping === 0 ? "Free" : `EGP ${shipping.toFixed(2)}`}</dd></div>
+              <div className="flex justify-between"><dt className="text-stone">Tax</dt><dd className="tabular-nums">EGP {tax.toFixed(2)}</dd></div>
             </dl>
 
             <div className="mb-6 mt-4 flex items-baseline justify-between border-t border-charcoal/12 pt-4">
               <span className="text-[11px] uppercase tracking-[0.25em] text-stone">Total</span>
-              <span className="font-display text-3xl tabular-nums">${total.toFixed(2)}</span>
+              <span className="font-display text-3xl tabular-nums">EGP {total.toFixed(2)}</span>
             </div>
 
             <button
@@ -269,7 +269,7 @@ export default function Checkout() {
       <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center gap-4 border-t border-charcoal/10 bg-cream/95 px-4 py-3 shadow-md backdrop-blur-md lg:hidden">
         <div className="flex-shrink-0">
           <p className="text-[10px] uppercase tracking-[0.2em] text-stone">Total</p>
-          <p className="font-display text-xl leading-none tabular-nums">${total.toFixed(2)}</p>
+          <p className="font-display text-xl leading-none tabular-nums">EGP {total.toFixed(2)}</p>
         </div>
         <button
           onClick={placeOrder}

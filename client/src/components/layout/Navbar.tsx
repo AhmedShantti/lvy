@@ -95,7 +95,7 @@ export default function Navbar() {
         <div className="bg-charcoal text-cream overflow-hidden">
           <div className="container h-9 flex items-center justify-between text-[10px] uppercase tracking-[0.3em]">
             <div className="hidden md:flex items-center gap-6 text-cream/60">
-              <span>EN · USD</span>
+              <span>EN · EGP</span>
               <Link to="/shipping" className="hover:text-cream transition">Shipping</Link>
               <Link to="/about" className="hover:text-cream transition">Our craft</Link>
             </div>
@@ -341,7 +341,7 @@ function MegaMenu() {
               />
             </div>
             <p className="font-display text-lg">{featuredPiece.name}</p>
-            <p className="text-xs text-muted tabular-nums">${Number(featuredPiece.price).toFixed(0)}</p>
+            <p className="text-xs text-muted tabular-nums">EGP {Number(featuredPiece.price).toFixed(0)}</p>
             <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-terracotta group-hover:gap-3 flex items-center gap-2 transition-all">
               Discover <ArrowRight size={11} />
             </p>
@@ -442,7 +442,7 @@ function SearchOverlay({ onClose, onPick }: { onClose: () => void; onPick: (slug
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] uppercase tracking-wider text-muted">{p.category?.name}</p>
                     <p className="font-display text-lg group-hover:text-terracotta transition">{p.name}</p>
-                    <p className="text-sm text-muted tabular-nums">${Number(p.price).toFixed(0)}</p>
+                    <p className="text-sm text-muted tabular-nums">EGP {Number(p.price).toFixed(0)}</p>
                   </div>
                 </motion.button>
               ))}
@@ -517,7 +517,7 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
             </div>
           )}
           <div className="flex items-center gap-6 pt-4 text-xs uppercase tracking-[0.3em] text-muted">
-            <span>EN · USD</span>
+            <span>EN · EGP</span>
             <Link to="/shipping" onClick={onClose}>Shipping</Link>
             <Link to="/about" onClick={onClose}>Craft</Link>
           </div>

@@ -92,7 +92,7 @@ export const DEFAULT_HOME_SECTIONS = [
 export const DEFAULT_SETTINGS = {
   storeName: "LVY",
   supportEmail: "support@lvy.shop",
-  currency: "USD",
+  currency: "EGP",
   taxRate: 0.08,
   freeShippingThreshold: 1500,
   standardShipping: 25,

@@ -13,7 +13,7 @@ const TIERS = [
     name: "Standard",
     icon: Package,
     time: "5–8 business days",
-    priceLabel: "Free over $1,500",
+    priceLabel: "Free over EGP 1,500",
     note: "Curbside drop-off with signature.",
     highlight: false,
   },
@@ -22,7 +22,7 @@ const TIERS = [
     name: "Express",
     icon: Truck,
     time: "2–3 business days",
-    priceLabel: "$60",
+    priceLabel: "EGP 60",
     note: "Priority dispatch, curbside delivery.",
     highlight: false,
   },
@@ -31,7 +31,7 @@ const TIERS = [
     name: "White Glove",
     icon: Shield,
     time: "Scheduled appointment",
-    priceLabel: "$199",
+    priceLabel: "EGP 199",
     note: "Two-person crew places it, assembles, and removes packaging.",
     highlight: true,
   },
@@ -39,7 +39,7 @@ const TIERS = [
 
 const COMPARE_ROWS = [
   { label: "Speed", standard: "5–8 days", express: "2–3 days", whiteGlove: "By appointment" },
-  { label: "Base price", standard: "$25 / free over $1,500", express: "$60", whiteGlove: "$199" },
+  { label: "Base price", standard: "EGP 25 / free over EGP 1,500", express: "EGP 60", whiteGlove: "EGP 199" },
   { label: "Curbside drop-off", standard: true, express: true, whiteGlove: true },
   { label: "Indoor placement", standard: false, express: false, whiteGlove: true },
   { label: "Assembly included", standard: false, express: false, whiteGlove: true },
@@ -230,7 +230,7 @@ export default function Shipping() {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Order subtotal ($)</label>
+                    <label className="text-[10px] uppercase tracking-[0.25em] text-muted block mb-2">Order subtotal (EGP)</label>
                     <input
                       type="number"
                       value={subtotalInput}
@@ -269,7 +269,7 @@ export default function Shipping() {
                       >
                         <p className="text-[10px] uppercase tracking-[0.25em] text-muted">{r.label}</p>
                         <p className="font-display text-2xl tabular-nums mt-1">
-                          {r.price === 0 ? "Free" : `$${r.price}`}
+                          {r.price === 0 ? "Free" : `EGP ${r.price}`}
                         </p>
                         <p className="text-xs text-muted mt-1">{r.eta} days</p>
                       </motion.div>

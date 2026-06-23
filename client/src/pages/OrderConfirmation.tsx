@@ -161,21 +161,21 @@ export default function OrderConfirmation() {
                     <p className="font-medium">{i.name}</p>
                     <p className="text-sm text-muted">Qty {i.quantity} · ${Number(i.price).toFixed(0)} each</p>
                   </div>
-                  <p className="font-display tabular-nums">${(Number(i.price) * i.quantity).toFixed(0)}</p>
+                  <p className="font-display tabular-nums">EGP {(Number(i.price) * i.quantity).toFixed(0)}</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="bg-sand/30 p-6 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted">Subtotal</span><span className="tabular-nums">${Number(order.subtotal).toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-muted">Shipping</span><span className="tabular-nums">${Number(order.shipping).toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-muted">Tax</span><span className="tabular-nums">${Number(order.tax).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted">Subtotal</span><span className="tabular-nums">EGP {Number(order.subtotal).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted">Shipping</span><span className="tabular-nums">EGP {Number(order.shipping).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted">Tax</span><span className="tabular-nums">EGP {Number(order.tax).toFixed(2)}</span></div>
             {Number(order.discount) > 0 && (
               <div className="flex justify-between text-terracotta"><span>Discount</span><span className="tabular-nums">−${Number(order.discount).toFixed(2)}</span></div>
             )}
             <div className="flex justify-between font-display text-xl pt-3 border-t border-charcoal/10">
-              <span>Total</span><span className="tabular-nums">${Number(order.total).toFixed(2)}</span>
+              <span>Total</span><span className="tabular-nums">EGP {Number(order.total).toFixed(2)}</span>
             </div>
           </div>
         </>
