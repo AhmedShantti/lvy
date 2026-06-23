@@ -13,7 +13,12 @@ export const authRouter = Router();
 const VERIFY_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 function clientUrl() {
-  return (process.env.CLIENT_URL?.split(",")[0]?.trim()) || "http://localhost:5173";
+  // First configured origin, trailing slashes stripped (avoids "…app//verify-email").
+  return (process.env.CLIENT_URL?.split(",")[0]?.trim().replace(/\/+$/, "")) || "http://localhost:5173";
+}
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
 }
 
 function newVerifyToken() {
@@ -40,7 +45,9 @@ const registerSchema = z.object({
 
 authRouter.post("/register", async (req, res, next) => {
   try {
-    const { email, password, name } = registerSchema.parse(req.body);
+    const parsed = registerSchema.parse(req.body);
+    const email = normalizeEmail(parsed.email);
+    const { password, name } = parsed;
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) throw new HttpError(409, "Email already registered");
     const passwordHash = await bcrypt.hash(password, 10);
@@ -56,7 +63,8 @@ authRouter.post("/register", async (req, res, next) => {
 
 authRouter.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = z.object({ email: z.string().email(), password: z.string() }).parse(req.body);
+    const body = z.object({ email: z.string().email(), password: z.string() }).parse(req.body);
+    const email = normalizeEmail(body.email);
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw new HttpError(401, "Invalid credentials");
     const ok = await bcrypt.compare(password, user.passwordHash);
@@ -99,7 +107,8 @@ authRouter.post("/verify-email", async (req, res, next) => {
 
 authRouter.post("/resend-verification", async (req, res, next) => {
   try {
-    const { email } = z.object({ email: z.string().email() }).parse(req.body);
+    const body = z.object({ email: z.string().email() }).parse(req.body);
+    const email = normalizeEmail(body.email);
     const user = await prisma.user.findUnique({ where: { email } });
     if (user && !user.emailVerified) {
       const { verifyToken, verifyTokenExp } = newVerifyToken();
